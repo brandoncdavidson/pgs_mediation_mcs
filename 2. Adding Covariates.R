@@ -1,13 +1,10 @@
 rm(list=ls())
-setwd("C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Merged Scripts")
+setwd("C:.../OneDrive - University of Cambridge/Genetic Data/Merged Scripts")
 library(haven)
 library(readxl)
 library(dplyr)
 library(tidyverse)
 library(tidyr)
-library(rempsyc)
-library(ggplot2)
-library(gtsummary)
 
 #reading it in like this means that any refusal, non-completion or null values are being read as NA
 
@@ -16,9 +13,9 @@ all_mcs <- read.csv("new_data_1.csv", na.strings = c("-8", "-7", "-6", "-5", "-4
   rename(FEARON_FID = FEARON_FID.x) %>%
   rename(GENDAC_QUERY_SAMPLE = GENDAC_QUERY_SAMPLE.x)
 
-###################################################################
-#CALCULATING A COMPOSITE GCSE SCORE - SEVERAL CANDIDATE MECHANISMS#
-###################################################################
+####################################
+#CALCULATING A COMPOSITE GCSE SCORE#
+####################################
 
 # Function to convert letter grade to numeric value
 letter_grade_to_numeric <- function(grade) {
@@ -52,11 +49,9 @@ all_mcs <- all_mcs %>%
 #### TOTAL SCORE ####
 
 calculate_total_score <- function(...) {
-  # Check if all subject scores are NA
   if(all(is.na(c(...)))) {
     return(NA)
   } else {
-    # Sum up all the scores (excluding 'child_ID')
     total_score <- sum(c(...), na.rm = TRUE)
     return(total_score)
   }
@@ -82,10 +77,7 @@ print(distribution)
 
 missing_participant <- all_mcs[is.na(all_mcs$AHCSEX00), ]
 
-#there is a single participant who has NA in the AHCSEX00 variable. infuriating.i checked back to the original data pre-merge
-#and it seems that they are a participant who joined at sweep 2, and did not seem to fill out any of the demographic-type
-#information in that sweep for the child (or at least did not fill out child sex). we could in theory request CHCSEX00 and
-#hope the information is there - but it seems relatively minor and unimportant.
+#there is a single participant with missing data for child sex at both sweeps
 
 ##################
 #SES - OECD SCORE#
@@ -104,4 +96,4 @@ all_mcs <- all_mcs %>%
 #write.csv with the covariates#
 ###############################
 
-write.csv(all_mcs, file = "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Merged Scripts/new_data_2.csv")
+write.csv(all_mcs, file = "C:.../OneDrive - University of Cambridge/Genetic Data/Merged Scripts/new_data_2.csv")
