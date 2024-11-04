@@ -4,7 +4,7 @@ rm(list=ls())
 #loading packages#
 ##################
 
-setwd("C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Full Dataset")
+setwd("C:.../OneDrive - University of Cambridge/Genetic Data/Full Dataset")
 library(haven)
 library(readxl)
 library(dplyr)
@@ -23,21 +23,6 @@ child_sex_sweep_2 <- read.csv("GDAC_2022_17_FEARON_5_mcs_hhgrid_structure_pheno_
 child_test_scores <- read.csv("GDAC_2022_17_FEARON_mcs_data_struct_cm_long_2024-03-14.csv") #child-based measure
 gcse_scores <- read.csv("GDAC_2022_17_FEARON_mcs_data_struct_cm_extra_long_mcs7_cm_qualifications_2024-03-14.csv", na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A")) #child-based measure
 stratification <- read_spss("GDAC_2022_17_FEARON_6_mcs_data_struct_fam_2024-11-01_09-46-08.sav")
-#gcse_scores <- read_spss("gcse_scores.sav")
-
-##########################################################
-#checking difference between gcse_scores and gcse_scores1#
-##########################################################
-
-#gcse_scores$child_ID <- paste(gcse_scores$FEARON_FID, substr(gcse_scores$PNUM, 1, 1), sep = "_")
-#gcse_scores1$child_ID <- paste(gcse_scores1$FEARON_FID, substr(gcse_scores1$PNUM, 1, 1), sep = "_")
-
-#gcse_scores_unique <- gcse_scores %>%
-  #distinct(child_ID, .keep_all = TRUE)
-
-#gcse_scores1_unique <- gcse_scores1 %>%
-  #distinct(child_ID, .keep_all = TRUE) %>%
-  #subset(GENDAC_QUERY_SAMPLE == "mcs6_family_with_saliva")
 
 ################################################
 #ADD CHILD_ID AND RESTRICT TO PRIMARY CAREGIVER#
@@ -73,7 +58,7 @@ child_sex_sweep_2$completed_data_count_3 <- rowSums(!is.na(child_sex_sweep_2))
 gcse_scores$child_ID <- paste(gcse_scores$FEARON_FID, substr(gcse_scores$PNUM, 1, 1), sep = "_")
 
 #the findings for 72 ppts have been duplicated (depicting 40 rather than 20 rows, and thus duplicating their gcse results)
-#the code below identifies these children and removes thier duplicated set of results.
+#the code below identifies these children and removes their duplicated set of results.
 
 gcse_scores$child_ID
 fid_frequency <- table(gcse_scores$child_ID)
@@ -250,37 +235,26 @@ merge_family_1 <- merge(oecd_scores, all_weights, by = "FEARON_FID", all.x = TRU
 merge_family <- merge(merge_family_1, stratification, by = "FEARON_FID", all.x = TRUE, all.y = TRUE)
 
 #lets work backwards, prior attempts revealed weird ppt counts when merging. this was an issue with duplicated rows. the 
-#below method is unconventional but helped me identify the problem so i will be forever grateful <3. essentially, we take
-#the family-based variables merged above, and create every potential child_ID that could be generated (i.e., accounting
+#below method is unconventional but helped me identify the problem. essentially, we take the family-based
+#variables merged above, and create every potential child_ID that could be generated (i.e., accounting
 #for twins etc.). then we perform left-joins onto this dataframe and check how much data was retained (with the sanity
 #checks created earlier).
 
 merge_family_duplicated <- merge_family[rep(1:nrow(merge_family), each = 2), ]
 merge_family_duplicated$child_ID <- paste0(merge_family_duplicated$FEARON_FID, "_", rep(1:2, times = nrow(merge_family)))
 
-#now we can perform a left-join for each of the child-based variables onto the family variables. 
 merge_full_a <- left_join(merge_family_duplicated, mcs7_qualifications_cm_grades, by = "child_ID")
 num_with_total_grades <- nrow(merge_full_a[!is.na(merge_full_a$Total_Grades), ])
-#this shows that there are 2 ppts who do not have family_ids anywhere else in the dataset?? how can that happen idk
-#(as there are 6616 ppts in the dataframe, but only 6614 survived the merge). this is a problem that will emerge again
-#with the pgs data.
-
-non_overlapping_ppts <- anti_join(mcs7_qualifications_cm_grades, merge_family_duplicated, by = "child_ID")
 
 merge_full_b <- left_join(merge_full_a, child_test_scores, by = "child_ID")
-#check instances where the ppts have been removed due to their child_ID being not-present
 num_with_row_data_1 <- nrow(merge_full_b[!is.na(merge_full_b$completed_data_count_1), ])
-#ok this is perfect, there are no missing participants here. everyone with data has been added. YAY.
 
 merge_full_c <- left_join(merge_full_b, child_sex_sweep_1, by = "child_ID")
-#check instances where the ppts have been removed due to their child_ID being not-present
 num_with_row_data_2 <- nrow(merge_full_c[!is.na(merge_full_c$completed_data_count_2), ])
 #ok this is perfect, there are no missing participants here. everyone with data has been added. YAY.
 
 merge_full_d <- left_join(merge_full_c, child_sex_sweep_2, by = "child_ID")
-#check instances where the ppts have been removed due to their child_ID being not-present
 num_with_row_data_3 <- nrow(merge_full_d[!is.na(merge_full_d$completed_data_count_3), ])
-#ok this is perfect, there are no missing participants here. everyone with data has been added. YAY.
 
 #for the most part, this was a total success. now we just need to drop the rows whereby there is no additional data (meaning
 #they were the rows where unused child_IDs are present). this will be done with another row counting procedure. the logic here
@@ -292,9 +266,9 @@ final_merge <- merge_full_d[merge_full_d$completed_data_count_finalcheck > 0, ]
 
 rm(all_weights, child_sex_sweep_1, child_sex_sweep_2, child_test_scores, gcse_scores, mcs7_qualifications_cm_grades, merge_family, merge_family_duplicated, merge_full_a, merge_full_b, merge_full_c, merge_full_d, oecd_scores, num_with_row_data_2, num_with_row_data_3, num_with_total_grades, num_with_total_scores, non_overlapping_ppts, merge_family_1, stratification)
 
-##########################
-#DROPPING USELESS COLUMNS#
-##########################
+###########################
+#DROPPING UNNEEDED COLUMNS#
+###########################
 
 cols_to_keep <- c("FEARON_FID.x",
                   "GENDAC_QUERY_SAMPLE.x",
@@ -360,7 +334,7 @@ cols_to_keep <- c("FEARON_FID.x",
                   "PTTYPE2"
 )
 
-#to see if any errors will pop up
+#identify any errors that may have occurred that have caused missing columns
 missing_columns <- setdiff(cols_to_keep, colnames(final_merge))
 
 # Print the missing columns
@@ -374,9 +348,9 @@ if (length(missing_columns) > 0) {
 # Remove all other columns
 all_data <- final_merge[, cols_to_keep, drop = FALSE]
 
-##################################################################
-#write_csv so you never have to do this awful merge process again#
-##################################################################
+###########
+#write_csv#
+###########
 
-write.csv(all_data, file = "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Merged Scripts/new_data_1.csv")
+write.csv(all_data, file = "C:.../OneDrive - University of Cambridge/Genetic Data/Merged Scripts/new_data_1.csv")
 
