@@ -1,0 +1,195 @@
+rm(list=ls())
+
+##################
+#loading packages#
+##################
+
+setwd("C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Merged Scripts")
+library(haven)
+library(readxl)
+library(dplyr)
+library(tidyverse)
+library(tidyr)
+library(psych)
+
+all_mcs <- read.csv("new_data_2.csv", na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A"))
+
+all_mcs <- all_mcs %>%
+  subset(select = -c(X))
+
+###########################
+#WORKING WITH GENETIC DATA#
+###########################
+
+setwd("C:/Users/brand/OneDrive - University of Cambridge/Genetic Data")
+
+genetics1 <- read.csv("prsice_pgi_MCS_EA4_p1e5_fearonid_20231206.csv")
+mcs_demographic <- read_spss("GDAC_2022_17_FEARON_mcs_basic_demographics_v0003_shareable_20220215.sav")
+first10principlecomponents <- read.csv("MCS_topmed_EUR_KING_QCd_PCA_bigsnpr_fearonid_20231206.csv")
+
+#splitting into mother, father and child
+
+mcs_demographic$member_ID <- paste(mcs_demographic$fearon_fid, mcs_demographic$pnum, sep = "_")
+mcs_demographic <- mcs_demographic[!duplicated(mcs_demographic$member_ID), ]
+genetics1$member_ID <- paste(genetics1$FEARON_FID, genetics1$PNUM, sep = "_")
+first10principlecomponents$member_ID <- paste(first10principlecomponents$FEARON_FID, first10principlecomponents$PNUM, sep = "_")
+
+pgs <- merge(genetics1, first10principlecomponents, by = 'member_ID', all.x = TRUE, all.y = TRUE)
+pgs_pcs <- merge(pgs, mcs_demographic, by = "member_ID", all.x = TRUE, all.y = FALSE) %>%
+  select(member_ID, fearon_fid, sex, mfc, pnum, PRS, PC1, PC2, PC3, PC4, PC5, PC6, PC7, PC8, PC9, PC10, PC11, PC12, PC13, PC14, PC15, PC16, PC17, PC18, PC19, PC20) %>%
+  rename(FEARON_FID = fearon_fid)
+
+###############################
+#EXTRACT AVERAGE_OECD_VARIABLE#
+###############################
+
+average_oecd <- subset(all_mcs, select = c(average_oecd_score, FEARON_FID))
+average_oecd_fearonfid <- average_oecd %>% 
+  distinct(FEARON_FID, .keep_all = TRUE)
+
+#leftjoin, whereby any row with a given FEARON_FID is given the average_oecd for that household
+
+pgs_pcs <- pgs_pcs %>%
+  left_join(average_oecd_fearonfid, by = "FEARON_FID")
+
+######################################################
+#STANDARDISE PGS AND REGRESS OUT PRINCIPLE COMPONENTS#
+######################################################
+
+pgs_pcs$PRS_standardised <- as.vector(scale(pgs_pcs$PRS))
+pgs_pcs_complete <- pgs_pcs %>% filter(!is.na(average_oecd_score))
+pgs_pcs_regressed <- lm(PRS_standardised ~ PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8 + PC9 + PC10 + sex + average_oecd_score, data = pgs_pcs_complete)
+pgs_pcs_complete$PRS_regressed <- residuals(pgs_pcs_regressed)
+pgs_pcs <- pgs_pcs %>%
+  left_join(pgs_pcs_complete %>% select(member_ID, PRS_regressed), by = "member_ID")
+
+columns_to_remove <- paste0("PC", 1:20)
+pgs_pcs <- pgs_pcs %>% 
+  select(-one_of(columns_to_remove)) %>%
+  select(-average_oecd_score)
+
+#####################################
+#SPLIT INTO MOTHER, CHILD AND FATHER#
+#####################################
+
+pgsmother <- subset(pgs_pcs, mfc == "M") %>%
+  subset(!is.na(PRS)) %>%
+  rename(Mother_PRS = PRS) %>%
+  rename(Mother_PRS_standardised = PRS_standardised) %>%
+  rename(Mother_PRS_regressed = PRS_regressed)
+pgsfather <- subset(pgs_pcs, mfc == "F") %>%
+  subset(!is.na(PRS)) %>%
+  rename(Father_PRS = PRS) %>%
+  rename(Father_PRS_standardised = PRS_standardised) %>%
+  rename(Father_PRS_regressed = PRS_regressed)
+pgschild <- subset(pgs_pcs, mfc == "C") %>%
+  subset(!is.na(PRS)) %>%
+  rename(Child_PRS = PRS) %>%
+  rename(Child_PRS_standardised = PRS_standardised) %>%
+  rename(Child_PRS_regressed = PRS_regressed) %>%
+  mutate(child_ID = paste(FEARON_FID, substr(pnum, 1, 1), sep = "_"))
+
+################
+#MERGING PART 1#
+################
+
+merge1 <- merge(all_mcs, pgschild, by = "child_ID", all.x = TRUE, all.y = FALSE) %>%
+  rename(FEARON_FID = FEARON_FID.x)
+
+merge1 <- merge1 %>%
+  mutate(FEARON_FID = if_else(is.na(FEARON_FID), FEARON_FID.y, FEARON_FID))
+
+#child_ids_in_child_pgs <- pgschild %>%
+  #distinct(child_ID) %>%
+  #pull(child_ID)
+
+#child_ids_in_all_mcs <- all_mcs %>%
+  #distinct(child_ID) %>%
+  #pull(child_ID)
+
+#missing_in_all_mcs <- pgschild %>%
+  #anti_join(all_mcs, by = "child_ID")
+
+
+##############
+#REMOVE TWINS#
+##############
+
+mcsids_with_two_children <- merge1 %>%
+  group_by(FEARON_FID) %>%
+  filter(n() > 1) %>%
+  dplyr::select(FEARON_FID) %>%
+  distinct()
+print(mcsids_with_two_children)
+
+#THIS CODE ATTEMPTS TO REMOVE ONE TWIN AT RANDOM
+
+merge1$twinhousehold <- FALSE
+
+# Identify households with twins in 'mcsids_with_two_children'
+households_with_twins <- mcsids_with_two_children$FEARON_FID
+
+# Update 'all_mcs' column to TRUE for households with twins
+merge1$twinhousehold[merge1$MCSID %in% households_with_twins] <- TRUE
+
+#IMPORTANT NOTE - THIS CODE IS CONTINGENT ON A SET SEED. THIS MEANS THAT, WHILST RANDOM, THE RESULTS ARE REPRODUCABLE. 
+#IF YOU CHANGE THIS NUMBER, YOU WILL HAVE DIFFERENT REMOVALS THAN I HAVE NOW. SARAH AND AMBER, CHANGE THIS SET SEED NUMBER 
+#TO ANY OTHER RANDOM VALUE TO ENSURE YOU REMOVE DIFFERENT TWINS THAN MYSELF#
+
+set.seed(4563)  # Set a seed for reproducibility, change as needed
+merge1 <- merge1 %>%
+  group_by(FEARON_FID) %>%
+  slice_sample(n = 1) %>%
+  ungroup()
+
+# Remove the 'twinhousehold' column as it's not needed anymore
+merge1 <- merge1 %>%
+  dplyr::select(-twinhousehold)
+
+#####################################################################################
+#MERGE PART 2 - BY WAITING UNTIL AFTER TWIN DELETION, CAN MERGE BY FEARON_FID FREELY#
+#####################################################################################
+
+merge2 <- merge(merge1, pgsmother, by = "FEARON_FID", all.x = TRUE, all.y = FALSE)
+all_mcs_genetic <- merge(merge2, pgsfather, by = "FEARON_FID", all.x = TRUE, all.y = FALSE)
+
+colnames(all_mcs_genetic)
+
+all_mcs_genetic <- all_mcs_genetic %>%
+  select(-member_ID.x, -member_ID.y, -member_ID, -FEARON_FID.y, -mfc, -mfc.x, -mfc.y, -sex, -sex.y, -sex.x, -pnum, -pnum.x, -pnum.y)
+
+###################################################
+#CHECK NUMBER OF PRS SCORES IN DATASET FOR CLARITY#
+###################################################
+
+# Keep rows where at least one of the specified columns is not NA and not empty
+
+all_mcs_genetic_2 <- all_mcs_genetic[!(is.na(all_mcs_genetic$Child_PRS_regressed) & 
+                                         is.na(all_mcs_genetic$Father_PRS_regressed) & 
+                                         is.na(all_mcs_genetic$Mother_PRS_regressed)), ]
+
+#########################
+#counts of each instance#
+#########################
+
+count <- select(all_mcs_genetic_2, Child_PRS_regressed, Mother_PRS_regressed, Father_PRS_regressed) %>%
+    rename(Child = Child_PRS_regressed) %>%
+    rename(Mother = Mother_PRS_regressed) %>%
+    rename(Father = Father_PRS_regressed) %>%
+  mutate(
+    Child = ifelse(!is.na(Child), "child", NA),
+    Mother = ifelse(!is.na(Mother), "mother", NA),
+    Father = ifelse(!is.na(Father), "father", NA),
+    instance = paste(Child, Mother, Father, sep = " ")
+  )
+
+instance_freq <- table(count$instance)
+print(instance_freq)
+instance_prop <- prop.table(instance_freq)
+print(instance_prop)
+
+####################################
+#MERGE GENETIC DATA WITH PHENOTYPIC#
+####################################
+
+write.csv(all_mcs_genetic, file = "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Merged Scripts/new_data_3.csv")
