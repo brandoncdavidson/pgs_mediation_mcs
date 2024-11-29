@@ -11,7 +11,7 @@ library(tidyverse)
 library(tidyr)
 library(psych)
 
-data_path <- "C:.../OneDrive - University of Cambridge/Genetic Data/Full Dataset"
+data_path <- "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Full dataset/"
 
 #######################
 #LOAD IN THE VARIABLES#
@@ -25,21 +25,21 @@ data_path <- "C:.../OneDrive - University of Cambridge/Genetic Data/Full Dataset
 #family-id or 'pnum', and adapt accordingly. also note that any reference to 'FEARON_FID' will be different for your
 #phenotyped-linked data. our files refer to FEARON, as he was the primary applicant in our data requests.
 
-all_weights_name <- "GDAC_2022_17_FEARON_5_mcs_data_struct_fam_2024-08-28_15-36-42.csv"
-oecd_scores_name <- "GDAC_2022_17_FEARON_4_mcs_data_struct_fam_2024-08-05_16-49-32.csv"
-child_sex_sweep_1_name <- "GDAC_2022_17_FEARON_mcs_data_struct_HHgrid_personlist_2024-03-14.csv"
-child_sex_sweep_2_name <- "GDAC_2022_17_FEARON_5_mcs_hhgrid_structure_pheno_data_2024-08-30_12-22-56.csv"
-child_test_scores_name <- "GDAC_2022_17_FEARON_mcs_data_struct_cm_long_2024-03-14.csv"
-gcse_scores_name <- "GDAC_2022_17_FEARON_mcs_data_struct_cm_extra_long_mcs7_cm_qualifications_2024-03-14.csv"
-stratification_name <- "GDAC_2022_17_FEARON_6_mcs_data_struct_fam_2024-11-01_09-46-08.sav"
+all_weights_name <- "GDAC_2022_17_FEARON_5_mcs_data_struct_fam_2024-08-28_15-36-42"
+oecd_scores_name <- "GDAC_2022_17_FEARON_4_mcs_data_struct_fam_2024-08-05_16-49-32"
+child_sex_sweep_1_name <- "GDAC_2022_17_FEARON_mcs_data_struct_HHgrid_personlist_2024-03-14"
+child_sex_sweep_2_name <- "GDAC_2022_17_FEARON_5_mcs_hhgrid_structure_pheno_data_2024-08-30_12-22-56"
+child_test_scores_name <- "GDAC_2022_17_FEARON_mcs_data_struct_cm_long_2024-03-14"
+gcse_scores_name <- "GDAC_2022_17_FEARON_mcs_data_struct_cm_extra_long_mcs7_cm_qualifications_2024-03-14"
+stratification_name <- "GDAC_2022_17_FEARON_6_mcs_data_struct_fam_2024-11-01_09-46-08"
 
 all_weights <- read.csv((paste(data_path, all_weights_name, ".csv", sep = ""))) #family-based measure
 oecd_scores <- read.csv((paste(data_path, oecd_scores_name, ".csv", sep = ""))) #family-based measure
-stratification <- read_spss((paste(data_path, stratification_name, ".csv", sep = ""))) #family-based measure
+stratification <- read_spss((paste(data_path, stratification_name, ".sav", sep = ""))) #family-based measure
 child_sex_sweep_1 <- read.csv((paste(data_path, child_sex_sweep_1_name, ".csv", sep = ""))) #child-based measure
 child_sex_sweep_2 <- read.csv((paste(data_path, child_sex_sweep_2_name, ".csv", sep = ""))) #child-based measure
 child_test_scores <- read.csv((paste(data_path, child_test_scores_name, ".csv", sep = ""))) #child-based measure
-gcse_scores <- read.csv((paste(data_path, gcse_scores_name, ".csv", sep = "", na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A")))) #child-based measure
+gcse_scores <- read.csv((paste(data_path, gcse_scores_name, ".csv", sep = "")), na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A")) #child-based measure
 
 ################################################
 #ADD CHILD_ID AND RESTRICT TO PRIMARY CAREGIVER#
@@ -60,17 +60,14 @@ child_test_scores$child_ID <- paste(child_test_scores$FEARON_FID, substr(child_t
 
 child_sex_sweep_1 <- subset(child_sex_sweep_1, PNUM %in% c(100, 200))
 child_sex_sweep_1$child_ID <- paste(child_sex_sweep_1$FEARON_FID, substr(child_sex_sweep_1$PNUM, 1, 1), sep = "_")
-#again there are duplicates present. remove these for successful merging
-child_sex_sweep_1 <- distinct(child_sex_sweep_1, child_ID, .keep_all = TRUE)
 
 child_sex_sweep_2 <- subset(child_sex_sweep_2, PNUM %in% c(100, 200))
 child_sex_sweep_2$child_ID <- paste(child_sex_sweep_2$FEARON_FID, substr(child_sex_sweep_2$PNUM, 1, 1), sep = "_")
-#also duplicates here. the data is identical in all rows, so it is okay to remove the excess.
-child_sex_sweep_2 <- distinct(child_sex_sweep_2, child_ID, .keep_all = TRUE)
 
-
-#note - there appear to be duplicate rows in this dataframe, which need removing for a successful left-join later on.
+#note - there may be duplicate rows in the dataframes. if this is the case, this script removes those.
 child_test_scores <- distinct(child_test_scores, child_ID, .keep_all = TRUE)
+child_sex_sweep_1 <- distinct(child_sex_sweep_1, child_ID, .keep_all = TRUE)
+child_sex_sweep_2 <- distinct(child_sex_sweep_2, child_ID, .keep_all = TRUE)
 
 #########################
 #MCS7 GCSE DATA CLEANING#
@@ -250,54 +247,44 @@ rm(gcse_data, igcse_data, btec_data, mcs7qualifications_filtered, mcs7qualificat
 ################
 
 #merge the two family-based variables first. then merge the 4 child-based variables. then perform a left-join for the
-#family variables onto the child (ensuring that, for twins, both twins will have the relevant data for their household)
+#family variables onto the child (ensuring that, for twins, both twins will have the relevant data for their household).
+#note - any renaming that occurs here is simply due to columns like 'FEARON_FID' appearing in every dataframe, and this
+#ensures we are saving the one with all the relevant information.
 
-merge_family_1 <- merge(oecd_scores, all_weights, by = "FEARON_FID", all.x = TRUE, all.y = TRUE)
-merge_family <- merge(merge_family_1, stratification, by = "FEARON_FID", all.x = TRUE, all.y = TRUE)
-
-#lets work backwards, prior attempts revealed weird ppt counts when merging. this was an issue with duplicated rows. the 
-#below method is unconventional but helped me identify the problem. essentially, we take the family-based
-#variables merged above, and create every potential child_ID that could be generated (i.e., accounting
-#for the potential of twins). then we perform left-joins onto this dataframe and check how much data was retained (with the sanity
-#checks created earlier).
-
-#we also encountered an issue that some ppts had withdrew in-between differeent data requests we had made. if you are
+#we encountered an issue that some ppts had withdrew in-between different data requests we had made. if you are
 #identifying some participants lacking data in recent iterations but have data earlier on - this may be the cause. if so,
 #check with the CLS and act accordingly. in our instance, we removed those participants when identified - as they no
 #longer wanted their data to be used.
 
-merge_family_duplicated <- merge_family[rep(1:nrow(merge_family), each = 2), ]
-merge_family_duplicated$child_ID <- paste0(merge_family_duplicated$FEARON_FID, "_", rep(1:2, times = nrow(merge_family)))
+merge_family_1 <- merge(oecd_scores, all_weights, by = "FEARON_FID", all.x = TRUE, all.y = TRUE)
+merge_family <- merge(merge_family_1, stratification, by = "FEARON_FID", all.x = TRUE, all.y = TRUE)
 
-merge_full_a <- left_join(merge_family_duplicated, mcs7_qualifications_cm_grades, by = "child_ID")
-num_with_total_grades <- nrow(merge_full_a[!is.na(merge_full_a$Total_Grades), ])
+child_merge_part1 <- merge(child_sex_sweep_1, child_sex_sweep_2, by = "child_ID", all.x = TRUE, all.y = TRUE)
+child_merge_part2 <- merge(child_merge_part1, child_test_scores, by = "child_ID", all.x = TRUE, all.y = TRUE)
+child_merge_final <- merge(child_merge_part2, mcs7_qualifications_cm_grades, by = "child_ID", all.x = TRUE, all.y = TRUE)
 
-merge_full_b <- left_join(merge_full_a, child_test_scores, by = "child_ID")
-num_with_row_data_1 <- nrow(merge_full_b[!is.na(merge_full_b$completed_data_count_1), ])
+child_merge_final <- child_merge_final %>%
+  select(-FEARON_FID, -GENDAC_QUERY_SAMPLE)
 
-merge_full_c <- left_join(merge_full_b, child_sex_sweep_1, by = "child_ID")
-num_with_row_data_2 <- nrow(merge_full_c[!is.na(merge_full_c$completed_data_count_2), ])
-#ok this is perfect, there are no missing participants here. everyone with data has been added. YAY.
+child_merge_final <- child_merge_final %>%
+  rename(FEARON_FID = FEARON_FID.x)
 
-merge_full_d <- left_join(merge_full_c, child_sex_sweep_2, by = "child_ID")
-num_with_row_data_3 <- nrow(merge_full_d[!is.na(merge_full_d$completed_data_count_3), ])
+final_merge <- left_join(child_merge_final, merge_family, by = "FEARON_FID")
 
-#for the most part, this was a total success. now we just need to drop the rows whereby there is no additional data (meaning
-#they were the rows where unused child_IDs are present). this will be done with another row counting procedure. the logic here
-#is that the child_IDs with no additional data will not have any data in the 4 failsafes we added (i.e., completed_columns_1)
+final_merge <- final_merge %>%
+  rename(GENDAC_QUERY_SAMPLE = GENDAC_QUERY_SAMPLE.x.x)
 
-merge_full_d$completed_data_count_finalcheck <- rowSums(!is.na(merge_full_d[, c("completed_data_count_1", "completed_data_count_2", "completed_data_count_3", "Total_Grades")]))
-
-final_merge <- merge_full_d[merge_full_d$completed_data_count_finalcheck > 0, ]
-
-rm(all_weights, child_sex_sweep_1, child_sex_sweep_2, child_test_scores, gcse_scores, mcs7_qualifications_cm_grades, merge_family, merge_family_duplicated, merge_full_a, merge_full_b, merge_full_c, merge_full_d, oecd_scores, num_with_row_data_2, num_with_row_data_3, num_with_total_grades, num_with_total_scores, non_overlapping_ppts, merge_family_1, stratification)
+rm(all_weights, child_merge_final, child_sex_sweep_1, child_sex_sweep_2, child_test_scores, gcse_scores, mcs7_qualifications_cm_grades, merge_family, merge_family_1, child_merge_part1, child_merge_part2, oecd_scores, stratification)
 
 ###########################
 #DROPPING UNNEEDED COLUMNS#
 ###########################
 
-cols_to_keep <- c("FEARON_FID.x",
-                  "GENDAC_QUERY_SAMPLE.x",
+#this section here selects only the relevant columns for your analysis and drops the remaining. this
+#may not be necessary if you only requested the essential variables for one project.
+
+cols_to_keep <- c("FEARON_FID",
+                  "GENDAC_QUERY_SAMPLE",
                   "child_ID",
                   "ADOEDE00",
                   "AHCSEX00",
@@ -374,9 +361,8 @@ if (length(missing_columns) > 0) {
 # Remove all other columns
 all_data <- final_merge[, cols_to_keep, drop = FALSE]
 
-###########
-#write_csv#
-###########
+##################
+#save_merged_data#
+##################
 
-write.csv(all_data, file = "C:.../OneDrive - University of Cambridge/Genetic Data/Merged Scripts/new_data_1.csv")
-
+write_csv(all_data, paste(data_path, "initial_merge", ".csv", sep = ""))
