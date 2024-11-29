@@ -4,7 +4,6 @@ rm(list=ls())
 #loading packages#
 ##################
 
-setwd("C:.../OneDrive - University of Cambridge/Genetic Data/Full Dataset")
 library(haven)
 library(readxl)
 library(dplyr)
@@ -12,44 +11,66 @@ library(tidyverse)
 library(tidyr)
 library(psych)
 
+data_path <- "C:.../OneDrive - University of Cambridge/Genetic Data/Full Dataset"
+
 #######################
 #LOAD IN THE VARIABLES#
 #######################
 
-all_weights <- read.csv("GDAC_2022_17_FEARON_5_mcs_data_struct_fam_2024-08-28_15-36-42.csv") #family-based measure
-oecd_scores <- read.csv("GDAC_2022_17_FEARON_4_mcs_data_struct_fam_2024-08-05_16-49-32.csv") #family-based measure
-child_sex_sweep_1 <- read.csv("GDAC_2022_17_FEARON_mcs_data_struct_HHgrid_personlist_2024-03-14.csv") #child-based measure
-child_sex_sweep_2 <- read.csv("GDAC_2022_17_FEARON_5_mcs_hhgrid_structure_pheno_data_2024-08-30_12-22-56.csv") #child-based measure
-child_test_scores <- read.csv("GDAC_2022_17_FEARON_mcs_data_struct_cm_long_2024-03-14.csv") #child-based measure
-gcse_scores <- read.csv("GDAC_2022_17_FEARON_mcs_data_struct_cm_extra_long_mcs7_cm_qualifications_2024-03-14.csv", na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A")) #child-based measure
-stratification <- read_spss("GDAC_2022_17_FEARON_6_mcs_data_struct_fam_2024-11-01_09-46-08.sav")
+#As the linked genetic and phenotypic data first requires approval from the Centre for Longitudinal studies, the
+#structure of this data and the files they arrive in will be determined by the variables you request. The purpose
+#of this script is to select all the relevant variables from the data we were given, begin cleaning some of the
+#more complex data (such as the gcse scores) and ensure that all children within a household are provided the relevant
+#family-level information. as such, when merging your own files, check whether or not the script is referring to
+#family-id or 'pnum', and adapt accordingly. also note that any reference to 'FEARON_FID' will be different for your
+#phenotyped-linked data. our files refer to FEARON, as he was the primary applicant in our data requests.
+
+all_weights_name <- "GDAC_2022_17_FEARON_5_mcs_data_struct_fam_2024-08-28_15-36-42.csv"
+oecd_scores_name <- "GDAC_2022_17_FEARON_4_mcs_data_struct_fam_2024-08-05_16-49-32.csv"
+child_sex_sweep_1_name <- "GDAC_2022_17_FEARON_mcs_data_struct_HHgrid_personlist_2024-03-14.csv"
+child_sex_sweep_2_name <- "GDAC_2022_17_FEARON_5_mcs_hhgrid_structure_pheno_data_2024-08-30_12-22-56.csv"
+child_test_scores_name <- "GDAC_2022_17_FEARON_mcs_data_struct_cm_long_2024-03-14.csv"
+gcse_scores_name <- "GDAC_2022_17_FEARON_mcs_data_struct_cm_extra_long_mcs7_cm_qualifications_2024-03-14.csv"
+stratification_name <- "GDAC_2022_17_FEARON_6_mcs_data_struct_fam_2024-11-01_09-46-08.sav"
+
+all_weights <- read.csv((paste(data_path, all_weights_name, ".csv", sep = ""))) #family-based measure
+oecd_scores <- read.csv((paste(data_path, oecd_scores_name, ".csv", sep = ""))) #family-based measure
+stratification <- read_spss((paste(data_path, stratification_name, ".csv", sep = ""))) #family-based measure
+child_sex_sweep_1 <- read.csv((paste(data_path, child_sex_sweep_1_name, ".csv", sep = ""))) #child-based measure
+child_sex_sweep_2 <- read.csv((paste(data_path, child_sex_sweep_2_name, ".csv", sep = ""))) #child-based measure
+child_test_scores <- read.csv((paste(data_path, child_test_scores_name, ".csv", sep = ""))) #child-based measure
+gcse_scores <- read.csv((paste(data_path, gcse_scores_name, ".csv", sep = "", na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A")))) #child-based measure
 
 ################################################
 #ADD CHILD_ID AND RESTRICT TO PRIMARY CAREGIVER#
 ################################################
 
+#this section of the script is written in a confusing way - but it is acting as a fail-safe for some issues we identified
+#later in the merge process. here, we are adding a 'child_id' to all files that refer to cohort members rather than family
+#wide information. this will assist in the merging process later. we also add a 'completed_data_count' column, which is
+#also important in the merging process.
+
+#this section handles all child-based measures, with the exception of gcse scores - which are very complicated in how
+#they are coded and, as such, have the section beneath this dedicated to their analysis.
+
 child_test_scores$child_ID <- paste(child_test_scores$FEARON_FID, substr(child_test_scores$PNUM, 1, 1), sep = "_")
-#note - there appear to be duplicate rows in this dataframe, which need removing for a successful left-join later on.
-child_test_scores <- distinct(child_test_scores, child_ID, .keep_all = TRUE)
-#this is for a sanity check later
-child_test_scores$completed_data_count_1 <- rowSums(!is.na(child_test_scores))
 
 #child sex is listed under PNUM=100/200, meaning it does not rely on definition from primary caregiver, and means we can
 #just subset to PNUM=100/200 to extract the child sex value at sweep 1 and 2.
 
 child_sex_sweep_1 <- subset(child_sex_sweep_1, PNUM %in% c(100, 200))
 child_sex_sweep_1$child_ID <- paste(child_sex_sweep_1$FEARON_FID, substr(child_sex_sweep_1$PNUM, 1, 1), sep = "_")
-#again there are duplicates present. remove these for your own mental health <3
+#again there are duplicates present. remove these for successful merging
 child_sex_sweep_1 <- distinct(child_sex_sweep_1, child_ID, .keep_all = TRUE)
-#this is for a sanity check later
-child_sex_sweep_1$completed_data_count_2 <- rowSums(!is.na(child_sex_sweep_1))
 
 child_sex_sweep_2 <- subset(child_sex_sweep_2, PNUM %in% c(100, 200))
 child_sex_sweep_2$child_ID <- paste(child_sex_sweep_2$FEARON_FID, substr(child_sex_sweep_2$PNUM, 1, 1), sep = "_")
-#also duplicates here. so confused why this keeps happening
+#also duplicates here. the data is identical in all rows, so it is okay to remove the excess.
 child_sex_sweep_2 <- distinct(child_sex_sweep_2, child_ID, .keep_all = TRUE)
-#this is for a sanity check later
-child_sex_sweep_2$completed_data_count_3 <- rowSums(!is.na(child_sex_sweep_2))
+
+
+#note - there appear to be duplicate rows in this dataframe, which need removing for a successful left-join later on.
+child_test_scores <- distinct(child_test_scores, child_ID, .keep_all = TRUE)
 
 #########################
 #MCS7 GCSE DATA CLEANING#
@@ -237,8 +258,13 @@ merge_family <- merge(merge_family_1, stratification, by = "FEARON_FID", all.x =
 #lets work backwards, prior attempts revealed weird ppt counts when merging. this was an issue with duplicated rows. the 
 #below method is unconventional but helped me identify the problem. essentially, we take the family-based
 #variables merged above, and create every potential child_ID that could be generated (i.e., accounting
-#for twins etc.). then we perform left-joins onto this dataframe and check how much data was retained (with the sanity
+#for the potential of twins). then we perform left-joins onto this dataframe and check how much data was retained (with the sanity
 #checks created earlier).
+
+#we also encountered an issue that some ppts had withdrew in-between differeent data requests we had made. if you are
+#identifying some participants lacking data in recent iterations but have data earlier on - this may be the cause. if so,
+#check with the CLS and act accordingly. in our instance, we removed those participants when identified - as they no
+#longer wanted their data to be used.
 
 merge_family_duplicated <- merge_family[rep(1:nrow(merge_family), each = 2), ]
 merge_family_duplicated$child_ID <- paste0(merge_family_duplicated$FEARON_FID, "_", rep(1:2, times = nrow(merge_family)))
