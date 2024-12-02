@@ -17,13 +17,13 @@ data_path <- "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Ful
 #LOAD IN THE VARIABLES#
 #######################
 
-#As the linked genetic and phenotypic data first requires approval from the Centre for Longitudinal studies, the
-#structure of this data and the files they arrive in will be determined by the variables you request. The purpose
-#of this script is to select all the relevant variables from the data we were given, begin cleaning some of the
-#more complex data (such as the gcse scores) and ensure that all children within a household are provided the relevant
-#family-level information. as such, when merging your own files, check whether or not the script is referring to
-#family-id or 'pnum', and adapt accordingly. also note that any reference to 'FEARON_FID' will be different for your
-#phenotyped-linked data. our files refer to FEARON, as he was the primary applicant in our data request.
+#Linked genetic and phenotypic data from the Millenium Cohort Study requires approval from the Centre for Longitudinal
+#Studies. As such, the datafiles you recieve will not be identical to the ones used in this analysis. Our data is 
+#broken up both categorically (as it will be provided to you) and from different request instances (following ammendments
+#to our application). In order to merge correctly, you need to identify which files are referring to 'cohort-members',
+#and which files refer to entire households. The merging process for both is similar, but 'cohort-member' level files
+#require the addition of a 'child_id'. Further, our family identifier is 'FEARON_FID', as FEARON was the primary
+#applicant for our access. As such, this will change according to your application.
 
 all_weights_name <- "GDAC_2022_17_FEARON_5_mcs_data_struct_fam_2024-08-28_15-36-42"
 oecd_scores_name <- "GDAC_2022_17_FEARON_4_mcs_data_struct_fam_2024-08-05_16-49-32"
@@ -45,21 +45,24 @@ gcse_scores <- read.csv((paste(data_path, gcse_scores_name, ".csv", sep = "")), 
 #ADD CHILD_ID AND RESTRICT TO PRIMARY CAREGIVER#
 ################################################
 
-#this section adds 'child_id' to all child-based measures, with the exception of gcse scores - which are very complicated 
-#in how they are coded and, as such, have the section beneath this dedicated to their analysis.
+#This section adds 'child_id' to all cohort-member level measures.
 
 child_test_scores$child_ID <- paste(child_test_scores$FEARON_FID, substr(child_test_scores$PNUM, 1, 1), sep = "_")
 
-#child sex is listed under PNUM=100/200, meaning it does not rely on definition from primary caregiver, and means we can
-#just subset to PNUM=100/200 to extract the child sex value at sweep 1 and 2.
+gcse_scores$child_ID <- paste(gcse_scores$FEARON_FID, substr(gcse_scores$PNUM, 1, 1), sep = "_")
 
-child_sex_sweep_1 <- subset(child_sex_sweep_1, PNUM %in% c(100, 200))
+child_sex_sweep_1 <- subset(child_sex_sweep_1, PNUM %in% c(100, 200)) #restricts to just cohort member
 child_sex_sweep_1$child_ID <- paste(child_sex_sweep_1$FEARON_FID, substr(child_sex_sweep_1$PNUM, 1, 1), sep = "_")
 
-child_sex_sweep_2 <- subset(child_sex_sweep_2, PNUM %in% c(100, 200))
+child_sex_sweep_2 <- subset(child_sex_sweep_2, PNUM %in% c(100, 200)) #restricts to just cohort member
 child_sex_sweep_2$child_ID <- paste(child_sex_sweep_2$FEARON_FID, substr(child_sex_sweep_2$PNUM, 1, 1), sep = "_")
 
-#note - there may be duplicate rows in the data-frames. if this is the case, this script removes those.
+############################################
+#CHECK FOR DUPLICATES IN THE RELEVANT FILES#
+############################################
+
+#This section ensures there are no duplicate rows in any of the files. This process is relatively complex for GCSE
+#scores, given how the data is coded.
 
 if (anyDuplicated(child_test_scores$child_ID) > 0) {
   child_test_scores <- distinct(child_test_scores, child_ID, .keep_all = TRUE)
@@ -73,39 +76,34 @@ if (anyDuplicated(child_sex_sweep_2$child_ID) > 0) {
   child_sex_sweep_2 <- distinct(child_sex_sweep_2, child_ID, .keep_all = TRUE)
 }
 
-#########################
-#MCS7 GCSE DATA CLEANING#
-#########################
-
-gcse_scores$child_ID <- paste(gcse_scores$FEARON_FID, substr(gcse_scores$PNUM, 1, 1), sep = "_")
-
-#the findings for 72 ppts have been duplicated (depicting 40 rather than 20 rows, and thus duplicating their gcse results)
-#the code below identifies these children and removes their duplicated set of results from the gcse results file.
-
+#This process here is checking if any 'child_ID' appears more than 20 times (as this should be the maximum number of 
+#instances of any cohort member)
 gcse_scores$child_ID
-fid_frequency <- table(gcse_scores$child_ID)
-print(fid_frequency)
-fid_over_20 <- names(fid_frequency[fid_frequency > 20])
-print(fid_over_20)
+childid_frequency <- table(gcse_scores$child_ID)
+child_over_20 <- names(childid_frequency[childid_frequency > 20])
+print(childid_over_20)
 
 gcse_scores <- gcse_scores %>%
   group_by(child_ID) %>%
   filter(row_number() <= 20) %>%
   ungroup()
 
-mcs7qualifications_filtered <- gcse_scores %>%
-  filter(!is.na(GC_L_GCSB_NAME_R40) | !is.na(GC_L_IGSB_NAME_R30))
-
 ##############################
 #MCS7 GCSE DATA RESTRUCTURING#
 ##############################
 
-#removing all columns except for GCSEs for ease, includes total number of qualifications -gcse, btec, igcse- completed
+#Remove all rows that do not have data in the relevant columns.
+
+mcs7qualifications_filtered <- gcse_scores %>%
+  filter(!is.na(GC_L_GCSB_NAME_R40) | !is.na(GC_L_IGSB_NAME_R30) | !is.na(GC_L_BTEC_NAME_R30))
+
+#Remove all columns that do not include useful data. This includes non-England based age-16 qualifications, as these are
+#challenging to interpret.
 
 mcs7qualifications_gradeonly <- mcs7qualifications_filtered %>%
   dplyr::select(child_ID, GC_L_GCSB_NAME_R40, GC_L_GCGD, GC_L_IGSB_NAME_R30, GC_L_IGGD, GC_L_BTEC_NAME_R30, GC_L_BTLV, GC_L_BTGD)
 
-#grade conversion function
+#Grade conversion functions:
 
 numeric_to_letter_grade_gcse <- function(score) {
   grade_map <- c("1", "2", "3", "4", "5", "6", "7", "8", "9", "U", "A*", "A", "B", "C", "D", "E", "F", "G", "N/A")
@@ -131,9 +129,7 @@ numeric_to_letter_grade_btec <- function(score) {
 global_counter <- 1
 last_child_ID <- NULL
 
-# Define a new function for subject code conversion
 reset_global_counter <- function(child_ID) {
-  # Reset the global counter if child_ID has changed
   if (!is.null(last_child_ID) && last_child_ID != child_ID) {
     global_counter <<- 1
   }
@@ -141,7 +137,7 @@ reset_global_counter <- function(child_ID) {
 }
 
 code_to_subject <- function(Grade, child_ID) {
-  reset_global_counter(child_ID)  # Reset the counter
+  reset_global_counter(child_ID)
   
   # Create a unique name for each subject with a global counter
   new_name <- paste("Subject", global_counter)
@@ -163,7 +159,8 @@ mcs7qualifications_gradeonly <- mcs7qualifications_gradeonly %>%
   ))
 
 
-# this applies the two functions - so that the grades and the subject names are now displayed
+# Apply the functions to add Grade
+
 mcs7qualifications_gradeonly <- mcs7qualifications_gradeonly %>%
   mutate(GCSEGrade = sapply(GC_L_GCGD, numeric_to_letter_grade_gcse))
 
@@ -177,6 +174,7 @@ mcs7qualifications_gradeonly <- mcs7qualifications_gradeonly %>%
   mutate(BTECGrade = sapply(GC_L_BTGD, numeric_to_letter_grade_btec))
 
 # Separate GCSE and IGCSE data
+
 gcse_data <- mcs7qualifications_gradeonly %>%
   dplyr::select(child_ID, GC_L_GCSB_NAME_R40, GCSEGrade)
 
@@ -186,7 +184,7 @@ igcse_data <- mcs7qualifications_gradeonly %>%
 btec_data <- mcs7qualifications_gradeonly %>%
   dplyr::select(child_ID, BTECLevel, BTECGrade)
 
-# Rename columns for consistency
+#Rename columns for consistency
 
 gcse_data <- gcse_data %>%
   rename(Subject = GC_L_GCSB_NAME_R40, Grade = GCSEGrade)
@@ -208,6 +206,7 @@ btec_data <- btec_data %>%
   dplyr::select(child_ID, Grade)
 
 # Filter out NAs
+
 gcse_data <- gcse_data %>%
   filter(!is.na(Grade))
 
@@ -215,13 +214,16 @@ igcse_data <- igcse_data %>%
   filter(!is.na(Grade))
 
 # Combine GCSE, IGCSE, and BTEC data
+
 combined_data <- bind_rows(gcse_data, igcse_data, btec_data)
 
 # Only showing edited rows
+
 combined_data <- combined_data %>%
   dplyr::select(child_ID, Subject, Grade)
 
 # Apply the 'code_to_subject' function
+
 combined_data <- combined_data %>%
   group_by(child_ID, Subject) %>%
   mutate(Subject = mapply(code_to_subject, Subject, child_ID))#
@@ -229,6 +231,7 @@ combined_data <- combined_data %>%
 table(combined_data$Subject)
 
 #pivot the data
+
 mcs7_qualifications_cm_grades <- combined_data %>%
   pivot_wider(
     names_from = Subject,
@@ -237,6 +240,7 @@ mcs7_qualifications_cm_grades <- combined_data %>%
   )
 
 # Select relevant columns
+
 mcs7_qualifications_cm_grades <- mcs7_qualifications_cm_grades %>%
   dplyr::select(child_ID, 'Subject 1', 'Subject 2', 'Subject 3', 'Subject 4', 'Subject 5', 'Subject 6', 'Subject 7', 'Subject 8', 'Subject 9', 'Subject 10', 'Subject 11', 'Subject 12', 'Subject 13', 'Subject 14', 'Subject 15', 'Subject 16')
 
