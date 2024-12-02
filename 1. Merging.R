@@ -45,13 +45,8 @@ gcse_scores <- read.csv((paste(data_path, gcse_scores_name, ".csv", sep = "")), 
 #ADD CHILD_ID AND RESTRICT TO PRIMARY CAREGIVER#
 ################################################
 
-#this section of the script is written in a confusing way - but it is acting as a fail-safe for some issues we identified
-#later in the merge process. here, we are adding a 'child_id' to all files that refer to cohort members rather than family
-#wide information. this will assist in the merging process later. we also add a 'completed_data_count' column, which is
-#also important in the merging process.
-
-#this section handles all child-based measures, with the exception of gcse scores - which are very complicated in how
-#they are coded and, as such, have the section beneath this dedicated to their analysis.
+#this section adds 'child_id' to all child-based measures, with the exception of gcse scores - which are very complicated 
+#in how they are coded and, as such, have the section beneath this dedicated to their analysis.
 
 child_test_scores$child_ID <- paste(child_test_scores$FEARON_FID, substr(child_test_scores$PNUM, 1, 1), sep = "_")
 
@@ -64,10 +59,19 @@ child_sex_sweep_1$child_ID <- paste(child_sex_sweep_1$FEARON_FID, substr(child_s
 child_sex_sweep_2 <- subset(child_sex_sweep_2, PNUM %in% c(100, 200))
 child_sex_sweep_2$child_ID <- paste(child_sex_sweep_2$FEARON_FID, substr(child_sex_sweep_2$PNUM, 1, 1), sep = "_")
 
-#note - there may be duplicate rows in the dataframes. if this is the case, this script removes those.
-child_test_scores <- distinct(child_test_scores, child_ID, .keep_all = TRUE)
-child_sex_sweep_1 <- distinct(child_sex_sweep_1, child_ID, .keep_all = TRUE)
-child_sex_sweep_2 <- distinct(child_sex_sweep_2, child_ID, .keep_all = TRUE)
+#note - there may be duplicate rows in the data-frames. if this is the case, this script removes those.
+
+if (anyDuplicated(child_test_scores$child_ID) > 0) {
+  child_test_scores <- distinct(child_test_scores, child_ID, .keep_all = TRUE)
+}
+
+if (anyDuplicated(child_sex_sweep_1$child_ID) > 0) {
+  child_sex_sweep_1 <- distinct(child_sex_sweep_1, child_ID, .keep_all = TRUE)
+}
+
+if (anyDuplicated(child_sex_sweep_2$child_ID) > 0) {
+  child_sex_sweep_2 <- distinct(child_sex_sweep_2, child_ID, .keep_all = TRUE)
+}
 
 #########################
 #MCS7 GCSE DATA CLEANING#
