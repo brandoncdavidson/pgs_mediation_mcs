@@ -23,7 +23,7 @@ data_path <- "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Ful
 #more complex data (such as the gcse scores) and ensure that all children within a household are provided the relevant
 #family-level information. as such, when merging your own files, check whether or not the script is referring to
 #family-id or 'pnum', and adapt accordingly. also note that any reference to 'FEARON_FID' will be different for your
-#phenotyped-linked data. our files refer to FEARON, as he was the primary applicant in our data requests.
+#phenotyped-linked data. our files refer to FEARON, as he was the primary applicant in our data request.
 
 all_weights_name <- "GDAC_2022_17_FEARON_5_mcs_data_struct_fam_2024-08-28_15-36-42"
 oecd_scores_name <- "GDAC_2022_17_FEARON_4_mcs_data_struct_fam_2024-08-05_16-49-32"
@@ -80,7 +80,7 @@ if (anyDuplicated(child_sex_sweep_2$child_ID) > 0) {
 gcse_scores$child_ID <- paste(gcse_scores$FEARON_FID, substr(gcse_scores$PNUM, 1, 1), sep = "_")
 
 #the findings for 72 ppts have been duplicated (depicting 40 rather than 20 rows, and thus duplicating their gcse results)
-#the code below identifies these children and removes their duplicated set of results.
+#the code below identifies these children and removes their duplicated set of results from the gcse results file.
 
 gcse_scores$child_ID
 fid_frequency <- table(gcse_scores$child_ID)
