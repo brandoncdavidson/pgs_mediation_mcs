@@ -15,14 +15,10 @@ all_mcs <- read.csv((paste(data_path, data_name, ".csv", sep = "")), na.strings 
 #CALCULATING A COMPOSITE GCSE SCORE#
 ####################################
 
-# Function to convert letter grade to numeric value
+#Function to convert letter grade to numeric value
 letter_grade_to_numeric <- function(grade) {
   grade <- toupper(grade)  # Convert input to uppercase for case insensitivity
-  
-  # Define mapping of letter grades to numeric values
   grade_mapping <- c("A*" = 8.5, "A" = 7, "B" = 5.5, "C*" = 5, "C" = 4.5, "D" = 3, "E"= 2.25, "F" = 1.5, "G" = 0.75, "U" = 0, "L1 Pass" = 1, "L1 Merit" = 2, "L1 Distinction" = 3, "L2 Pass" = 4, "L2 Merit" = 5.5, "L2 Distinction" = 7, "9" = 9, "8" = 8, "7" = 7, "6" = 6, "5" = 5, "4" = 4, "3" = 3, "2" = 2, "1" = 1)
-  
-  # Return the numeric value for the given letter grade
   return(ifelse(grade %in% names(grade_mapping), grade_mapping[grade], NA))
 }
 
@@ -75,7 +71,7 @@ print(distribution)
 
 missing_participant <- all_mcs[is.na(all_mcs$AHCSEX00), ]
 
-#there is a single participant with missing data for child sex at both sweeps
+#there is a single participant with missing data for child sex at both sweeps.
 
 ##################
 #SES - OECD SCORE#
@@ -94,4 +90,4 @@ all_mcs <- all_mcs %>%
 #write.csv with the covariates#
 ###############################
 
-write.csv(all_mcs, file = "C:.../OneDrive - University of Cambridge/Genetic Data/Merged Scripts/new_data_2.csv")
+write_csv(all_mcs, paste(data_path, "merge_with_covariates", ".csv", sep = ""))
