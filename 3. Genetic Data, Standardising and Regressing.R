@@ -1,10 +1,8 @@
-rm(list=ls())
-
 ##################
 #loading packages#
 ##################
 
-setwd("C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Merged Scripts")
+rm(list=ls())
 library(haven)
 library(readxl)
 library(dplyr)
@@ -12,22 +10,30 @@ library(tidyverse)
 library(tidyr)
 library(psych)
 
-all_mcs <- read.csv("new_data_2.csv", na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A"))
+mcs_data_path <- "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Full dataset/"
+mcs_data_name <- "merge_with_covariates"
+all_mcs <- read.csv((paste(data_path, data_name, ".csv", sep = "")), na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A"))
 
-all_mcs <- all_mcs %>%
-  subset(select = -c(X))
+#########################
+#LOADING IN GENETIC DATA#
+#########################
 
-###########################
-#WORKING WITH GENETIC DATA#
-###########################
+genetic_data_path <- "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/"
+genetic_data_name <- "prsice_pgi_MCS_EA4_p1e5_fearonid_20231206"
+genetic_data_demographic_name <- "GDAC_2022_17_FEARON_mcs_basic_demographics_v0003_shareable_20220215"
+genetic_data_principle_components_name <- "MCS_topmed_EUR_KING_QCd_PCA_bigsnpr_fearonid_20231206"
 
-setwd("C:/Users/brand/OneDrive - University of Cambridge/Genetic Data")
+genetics1 <- read.csv((paste(genetic_data_path, genetic_data_name, ".csv", sep = "")))
+mcs_demographic <- read_spss((paste(genetic_data_path, genetic_data_demographic_name, ".sav", sep = "")))
+first10principlecomponents <- read.csv((paste(genetic_data_path, genetic_data_principle_components_name, ".csv", sep = "")))
 
 genetics1 <- read.csv("prsice_pgi_MCS_EA4_p1e5_fearonid_20231206.csv")
 mcs_demographic <- read_spss("GDAC_2022_17_FEARON_mcs_basic_demographics_v0003_shareable_20220215.sav")
 first10principlecomponents <- read.csv("MCS_topmed_EUR_KING_QCd_PCA_bigsnpr_fearonid_20231206.csv")
 
-#splitting into mother, father and child
+#########################################
+#SPLITTING INTO MOTHER, FATHER AND CHILD#
+#########################################
 
 mcs_demographic$member_ID <- paste(mcs_demographic$fearon_fid, mcs_demographic$pnum, sep = "_")
 mcs_demographic <- mcs_demographic[!duplicated(mcs_demographic$member_ID), ]
@@ -192,4 +198,4 @@ print(instance_prop)
 #MERGE GENETIC DATA WITH PHENOTYPIC#
 ####################################
 
-write.csv(all_mcs_genetic, file = "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Merged Scripts/new_data_3.csv")
+write_csv(all_mcs, paste(data_path, "merge_with_genetic_data", ".csv", sep = ""))
