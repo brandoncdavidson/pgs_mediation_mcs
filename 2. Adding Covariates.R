@@ -1,5 +1,4 @@
 rm(list=ls())
-setwd("C:.../OneDrive - University of Cambridge/Genetic Data/Merged Scripts")
 library(haven)
 library(readxl)
 library(dplyr)
@@ -8,10 +7,9 @@ library(tidyr)
 
 #reading it in like this means that any refusal, non-completion or null values are being read as NA
 
-all_mcs <- read.csv("new_data_1.csv", na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A")) %>%
-  select(-X) %>%
-  rename(FEARON_FID = FEARON_FID.x) %>%
-  rename(GENDAC_QUERY_SAMPLE = GENDAC_QUERY_SAMPLE.x)
+data_path <- "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Full dataset/"
+data_name <- "initial_merge"
+all_mcs <- read.csv((paste(data_path, data_name, ".csv", sep = "")), na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A"))
 
 ####################################
 #CALCULATING A COMPOSITE GCSE SCORE#
