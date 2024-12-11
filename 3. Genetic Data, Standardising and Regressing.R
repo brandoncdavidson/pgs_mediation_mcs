@@ -140,8 +140,6 @@ merge1 <- merge1 %>%
 merge2 <- merge(merge1, pgsmother, by = "FEARON_FID", all.x = TRUE, all.y = FALSE)
 all_mcs_genetic <- merge(merge2, pgsfather, by = "FEARON_FID", all.x = TRUE, all.y = FALSE)
 
-colnames(all_mcs_genetic)
-
 all_mcs_genetic <- all_mcs_genetic %>%
   select(-member_ID.x, -member_ID.y, -member_ID, -FEARON_FID.y, -mfc, -mfc.x, -mfc.y, -sex, -sex.y, -sex.x, -pnum, -pnum.x, -pnum.y)
 
