@@ -180,3 +180,4 @@ print(instance_prop)
 ####################################
 
 write_csv(all_mcs_genetic, paste(mcs_data_path, "merge_with_genetic_data", ".csv", sep = ""))
+write_csv(all_mcs_genetic_2, paste(mcs_data_path, "merge_with_genetic_data_only_genetic", ".csv", sep = "")))
