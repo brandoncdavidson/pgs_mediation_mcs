@@ -1,0 +1,51 @@
+TITLE: SEM model equivalent to R lavaan model with sampling/non-response weights;
+
+DATA: FILE = "C:\Users\brand\OneDrive - University of Cambridge\Genetic Data\Full dataset\full_lang_data.txt";
+
+VARIABLE:
+  NAMES = BDBAST00 CCNVTSCORE DCMATHS7SA DCWRSD00 total_score weight PTTYPE2 Child_PRS_regressed Mother_PRS_regressed Father_PRS_regressed;
+  WEIGHT = GOVWT2;        
+  STRATIFICATION = PTTYPE2;
+  MISSING ARE ALL (-9999);
+
+ANALYSIS:
+  TYPE = COMPLEX;
+  ESTIMATOR = FIML;
+
+MODEL:
+  ! Define latent variables
+  language3 BY BDBAST00;
+  language5 BY CCNVTSCORE;
+  edu7 BY DCMATHS7SA DCWRSD00;
+  edu17 BY total_score;
+
+  ! Define structural paths with labels
+  language3 ON Child_PRS_regressed (a)  Mother_PRS_regressed Father_PRS_regressed;
+  language5 ON language3 (e) Child_PRS_regressed (b) Mother_PRS_regressed Father_PRS_regressed;
+  edu7 ON language5 (f) Child_PRS_regressed (c) Mother_PRS_regressed Father_PRS_regressed;
+  edu17 ON edu7 (g) Child_PRS_regressed (d) Mother_PRS_regressed Father_PRS_regressed;
+
+  ! Regressions for PRS variables
+  Child_PRS_regressed ON Mother_PRS_regressed Father_PRS_regressed;
+
+  ! Covariance
+  Mother_PRS_regressed WITH Father_PRS_regressed;
+
+MODEL CONSTRAINT:
+  ! Define total effects
+  NEW(totaleffectonedu17 totaleffectonedu7 totaleffectonlang5 totaleffectonlang3);
+  totaleffectonedu17 = d + (g * c) + (g * f * b) + (g * f * e * a);
+  totaleffectonedu7 = c + (f * b) + (f * e * a);
+  totaleffectonlang5 = b + (e * a);
+  totaleffectonlang3 = a;
+
+OUTPUT:
+  STANDARDIZED;
+  SAMPSTAT;
+  CINTERVAL(BOOTSTRAP);       ! Request bootstrap confidence intervals for indirect effects
+
+ANALYSIS:
+  BOOTSTRAP = 5;           ! Perform bootstrap with 5000 samples
+
+
+
