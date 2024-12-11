@@ -7,15 +7,11 @@
 #########################################################
 
 rm(list=ls())
-library(haven)
-library(readxl)
 library(dplyr)
 library(tidyverse)
-library(tidyr)
-library(rempsyc)
 library(gtsummary)
 library(Hmisc)
-library(quanteda)
+library(e1071)
 
 data_path <- "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Full dataset/"
 data_name <- "merge_with_genetic_data"
@@ -67,11 +63,7 @@ print(t_test_result)
 ###################################################
 
 variables_of_interest <- c("BDBAST00", "CCNVTSCORE", "CCPSTSCORE", "CCPCTSCORE", "DCMATHS7SA", "DCWRSD00", "total_score")
-
-# Filter data for selected variables
 data_filtered <- all_mcs_genetic[, variables_of_interest]
-
-# Rename columns
 colnames(data_filtered) <- c("Age 3 BAS-II: Naming Vocabulary",
                              "Age 5 BAS-II: Naming Vocabulary",                             
                              "Age 5 BAS-II: Picture Similarities", 
@@ -80,15 +72,12 @@ colnames(data_filtered) <- c("Age 3 BAS-II: Naming Vocabulary",
                              "Age 7 Word Reading",
                              "GCSE Total")
 
-# Calculate mean and standard deviation for each variable
 summary_statistics <- data_filtered %>%
   tbl_summary(statistic = all_continuous() ~ "{mean} ({sd})", digits = list(all_continuous() ~ c(2, 2)), include = 1:7)
 
-# Add frequency (n) column
 summary_statistics <- summary_statistics %>%
   add_n()
 
-# Modify header labels
 summary_statistics <- summary_statistics %>%
   modify_header(
     label = "**Variable**",
@@ -119,9 +108,6 @@ flattenCorrMatrix(res2$r, res2$P)
 ######################
 #skewness coefficient#
 ######################
-
-if(!require(e1071)) install.packages("e1071")
-library(e1071)
 
 skewness(all_mcs_genetic$BDBAST00, na.rm = TRUE)
 skewness(all_mcs_genetic$CCNVTSCORE, na.rm = TRUE)
