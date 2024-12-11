@@ -7,7 +7,6 @@
 #########################################################
 
 rm(list=ls())
-setwd("C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Merged Scripts")
 library(haven)
 library(readxl)
 library(dplyr)
@@ -18,7 +17,9 @@ library(gtsummary)
 library(Hmisc)
 library(quanteda)
 
-all_mcs <- read.csv("new_data_3.csv", na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A"))
+data_path <- "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Full dataset/"
+data_name <- "merge_with_genetic_data"
+all_mcs <- read.csv((paste(data_path, data_name, ".csv", sep = "")), na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A"))
 
 all_mcs_genetic <- all_mcs [!(is.na(all_mcs$Child_PRS_regressed) & 
                                 is.na(all_mcs$Father_PRS_regressed) & 
@@ -33,10 +34,17 @@ all_mcs_nongenetic <- all_mcs %>%
 #demographic characteristics of relevant variable - comparison between genetic and nongenetic#
 ##############################################################################################
 
-table(all_mcs_genetic$AHCSEX00)
-table(all_mcs_nongenetic$AHCSEX00)
+#CHILD SEX:
+
+childsex_genetic_table <- table(all_mcs_genetic$AHCSEX00)
+childsex_non_genetic_table <- table(all_mcs_nongenetic$AHCSEX00)
 
 #calculate chi-squared
+contingency_table <- rbind(childsex_genetic_table, childsex_non_genetic_table)
+chi_sq_result <- chisq.test(contingency_table)
+print(chi_sq_result)
+
+#OECD SCORE:
 
 mean(all_mcs_genetic$average_oecd_score)
 sd(all_mcs_genetic$average_oecd_score)
@@ -44,7 +52,15 @@ sd(all_mcs_genetic$average_oecd_score)
 mean(all_mcs_nongenetic$average_oecd_score, na.rm = TRUE)
 sd(all_mcs_nongenetic$average_oecd_score, na.rm = TRUE)
 
-#t-test
+#calculate t-test
+# Perform Welch's t-test
+t_test_result <- t.test(all_mcs_genetic$average_oecd_score, 
+                        all_mcs_nongenetic$average_oecd_score, 
+                        alternative = "two.sided",
+                        var.equal = FALSE,
+                        na.rm = TRUE)
+
+print(t_test_result)
 
 ###################################################
 #genetic sample: n, mean, sd, skewness coefficient#
