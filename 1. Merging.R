@@ -248,7 +248,7 @@ mcs7_qualifications_cm_grades <- mcs7_qualifications_cm_grades %>%
   ungroup() %>%
   mutate(Total_Grades = rowSums(!is.na(dplyr::select(., -child_ID))))
 
-rm(gcse_data, igcse_data, btec_data, mcs7qualifications_filtered, mcs7qualifications_gradeonly, mcs7_cm_qualifications_structure_pheno_data, combined_data, fid_frequency, fid_over_20, global_counter, last_child_ID)
+rm(gcse_data, igcse_data, btec_data, mcs7qualifications_filtered, mcs7qualifications_gradeonly, combined_data, global_counter, last_child_ID, child_over_20)
 
 ################
 #MERGE THE DATA#
@@ -275,12 +275,9 @@ child_merge_final <- child_merge_final %>%
   select(-FEARON_FID, -GENDAC_QUERY_SAMPLE)
 
 child_merge_final <- child_merge_final %>%
-  rename(FEARON_FID = FEARON_FID.x)
+  rename(FEARON_FID = FEARON_FID.y)
 
 final_merge <- left_join(child_merge_final, merge_family, by = "FEARON_FID")
-
-final_merge <- final_merge %>%
-  rename(GENDAC_QUERY_SAMPLE = GENDAC_QUERY_SAMPLE.x.x)
 
 rm(all_weights, child_merge_final, child_sex_sweep_1, child_sex_sweep_2, child_test_scores, gcse_scores, mcs7_qualifications_cm_grades, merge_family, merge_family_1, child_merge_part1, child_merge_part2, oecd_scores, stratification)
 
@@ -292,7 +289,6 @@ rm(all_weights, child_merge_final, child_sex_sweep_1, child_sex_sweep_2, child_t
 #may not be necessary if you only requested the essential variables for one project.
 
 cols_to_keep <- c("FEARON_FID",
-                  "GENDAC_QUERY_SAMPLE",
                   "child_ID",
                   "ADOEDE00",
                   "AHCSEX00",
