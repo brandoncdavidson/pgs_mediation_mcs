@@ -17,9 +17,9 @@ data_path <- "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Ful
 #LOAD IN THE VARIABLES#
 #######################
 
-#Linked genetic and phenotypic data from the Millenium Cohort Study requires approval from the Centre for Longitudinal
-#Studies. As such, the datafiles you recieve will not be identical to the ones used in this analysis. Our data is 
-#broken up both categorically (as it will be provided to you) and from different request instances (following ammendments
+#Linked genetic and phenotype data from the Millennium Cohort Study requires approval from the Center for Longitudinal
+#Studies. As such, the data files you receive will not be identical to the ones used in this analysis. Our data is 
+#broken up both categorically (as it will be provided to you) and from different request instances (following amendments
 #to our application). In order to merge correctly, you need to identify which files are referring to 'cohort-members',
 #and which files refer to entire households. The merging process for both is similar, but 'cohort-member' level files
 #require the addition of a 'child_id'. Further, our family identifier is 'FEARON_FID', as FEARON was the primary
@@ -78,6 +78,7 @@ if (anyDuplicated(child_sex_sweep_2$child_ID) > 0) {
 
 #This process here is checking if any 'child_ID' appears more than 20 times (as this should be the maximum number of 
 #instances of any cohort member)
+
 gcse_scores$child_ID
 childid_frequency <- table(gcse_scores$child_ID)
 child_over_20 <- names(childid_frequency[childid_frequency > 20])
@@ -92,13 +93,12 @@ gcse_scores <- gcse_scores %>%
 #MCS7 GCSE DATA RESTRUCTURING#
 ##############################
 
-#Remove all rows that do not have data in the relevant columns.
+#Remove all rows that do not have data in the relevant columns (indicating a value in GCSE, BTEC or IGCSE).
 
 mcs7qualifications_filtered <- gcse_scores %>%
   filter(!is.na(GC_L_GCSB_NAME_R40) | !is.na(GC_L_IGSB_NAME_R30) | !is.na(GC_L_BTEC_NAME_R30))
 
-#Remove all columns that do not include useful data. This includes non-England based age-16 qualifications, as these are
-#challenging to interpret.
+#Remove all columns that do not include useful data. This includes non-England based age-16 qualifications.
 
 mcs7qualifications_gradeonly <- mcs7qualifications_filtered %>%
   dplyr::select(child_ID, GC_L_GCSB_NAME_R40, GC_L_GCGD, GC_L_IGSB_NAME_R30, GC_L_IGGD, GC_L_BTEC_NAME_R30, GC_L_BTLV, GC_L_BTGD)
@@ -125,7 +125,8 @@ numeric_to_letter_grade_btec <- function(score) {
   return(grade_map[score])
 }
 
-# Define a new function for subject code conversion
+# Define a new function for subject code conversion, creating a sequential column called 'subject 1, subject 2 etc.'
+
 global_counter <- 1
 last_child_ID <- NULL
 
@@ -148,6 +149,8 @@ code_to_subject <- function(Grade, child_ID) {
   return(new_name)
 }
 
+#remove name codes for gcse and igcse scores, for ease of transformation
+
 mcs7qualifications_gradeonly <- mcs7qualifications_gradeonly %>%
   mutate(GC_L_GCSB_NAME_R40 = case_when(
     TRUE ~ NA_character_
@@ -159,7 +162,7 @@ mcs7qualifications_gradeonly <- mcs7qualifications_gradeonly %>%
   ))
 
 
-# Apply the functions to add Grade
+#apply the functions to add the actual grade achieved
 
 mcs7qualifications_gradeonly <- mcs7qualifications_gradeonly %>%
   mutate(GCSEGrade = sapply(GC_L_GCGD, numeric_to_letter_grade_gcse))
@@ -173,7 +176,7 @@ mcs7qualifications_gradeonly <- mcs7qualifications_gradeonly %>%
 mcs7qualifications_gradeonly <- mcs7qualifications_gradeonly %>%
   mutate(BTECGrade = sapply(GC_L_BTGD, numeric_to_letter_grade_btec))
 
-# Separate GCSE and IGCSE data
+#Separate GCSE, BTEC and IGCSE data into separate dataframes
 
 gcse_data <- mcs7qualifications_gradeonly %>%
   dplyr::select(child_ID, GC_L_GCSB_NAME_R40, GCSEGrade)
@@ -184,7 +187,7 @@ igcse_data <- mcs7qualifications_gradeonly %>%
 btec_data <- mcs7qualifications_gradeonly %>%
   dplyr::select(child_ID, BTECLevel, BTECGrade)
 
-#Rename columns for consistency
+#Rename columns for consistency and ease of merging; and clean up BTEC data due to increased complexity of grade mapping.
 
 gcse_data <- gcse_data %>%
   rename(Subject = GC_L_GCSB_NAME_R40, Grade = GCSEGrade)
@@ -205,7 +208,7 @@ btec_data <- btec_data %>%
 btec_data <- btec_data %>%
   dplyr::select(child_ID, Grade)
 
-# Filter out NAs
+#Filter out NAs for GCSE and BTEC
 
 gcse_data <- gcse_data %>%
   filter(!is.na(Grade))
