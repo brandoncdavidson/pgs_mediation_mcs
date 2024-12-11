@@ -71,7 +71,9 @@ print(distribution)
 
 missing_participant <- all_mcs[is.na(all_mcs$AHCSEX00), ]
 
-#there is a single participant with missing data for child sex at both sweeps.
+#There is a single participant with missing data for child sex at both sweeps. Child sex will be regressed
+#out of the PGS - and the participant without their child sex recorded does not provide genetic data.
+#Thus, this is not an issue here.
 
 ##################
 #SES - OECD SCORE#
