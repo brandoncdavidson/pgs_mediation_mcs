@@ -12,7 +12,7 @@ library(psych)
 
 mcs_data_path <- "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Full dataset/"
 mcs_data_name <- "merge_with_covariates"
-all_mcs <- read.csv((paste(data_path, data_name, ".csv", sep = "")), na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A"))
+all_mcs <- read.csv((paste(mcs_data_path, mcs_data_name, ".csv", sep = "")), na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A"))
 
 #########################
 #LOADING IN GENETIC DATA#
@@ -26,10 +26,6 @@ genetic_data_principle_components_name <- "MCS_topmed_EUR_KING_QCd_PCA_bigsnpr_f
 genetics1 <- read.csv((paste(genetic_data_path, genetic_data_name, ".csv", sep = "")))
 mcs_demographic <- read_spss((paste(genetic_data_path, genetic_data_demographic_name, ".sav", sep = "")))
 first10principlecomponents <- read.csv((paste(genetic_data_path, genetic_data_principle_components_name, ".csv", sep = "")))
-
-genetics1 <- read.csv("prsice_pgi_MCS_EA4_p1e5_fearonid_20231206.csv")
-mcs_demographic <- read_spss("GDAC_2022_17_FEARON_mcs_basic_demographics_v0003_shareable_20220215.sav")
-first10principlecomponents <- read.csv("MCS_topmed_EUR_KING_QCd_PCA_bigsnpr_fearonid_20231206.csv")
 
 #########################################
 #SPLITTING INTO MOTHER, FATHER AND CHILD#
@@ -101,21 +97,12 @@ pgschild <- subset(pgs_pcs, mfc == "C") %>%
 
 merge1 <- merge(all_mcs, pgschild, by = "child_ID", all.x = TRUE, all.y = FALSE) %>%
   rename(FEARON_FID = FEARON_FID.x)
+#In our case, there are a few participants who have genetic data due to the early request - but not
+#phenotypic data - as this was requested months later (following a wave of ppt consent redaction).
+#As such, we have used all.y = FALSE.
 
 merge1 <- merge1 %>%
   mutate(FEARON_FID = if_else(is.na(FEARON_FID), FEARON_FID.y, FEARON_FID))
-
-#child_ids_in_child_pgs <- pgschild %>%
-  #distinct(child_ID) %>%
-  #pull(child_ID)
-
-#child_ids_in_all_mcs <- all_mcs %>%
-  #distinct(child_ID) %>%
-  #pull(child_ID)
-
-#missing_in_all_mcs <- pgschild %>%
-  #anti_join(all_mcs, by = "child_ID")
-
 
 ##############
 #REMOVE TWINS#
@@ -128,21 +115,15 @@ mcsids_with_two_children <- merge1 %>%
   distinct()
 print(mcsids_with_two_children)
 
-#THIS CODE ATTEMPTS TO REMOVE ONE TWIN AT RANDOM
-
 merge1$twinhousehold <- FALSE
-
-# Identify households with twins in 'mcsids_with_two_children'
 households_with_twins <- mcsids_with_two_children$FEARON_FID
 
-# Update 'all_mcs' column to TRUE for households with twins
 merge1$twinhousehold[merge1$MCSID %in% households_with_twins] <- TRUE
 
-#IMPORTANT NOTE - THIS CODE IS CONTINGENT ON A SET SEED. THIS MEANS THAT, WHILST RANDOM, THE RESULTS ARE REPRODUCABLE. 
-#IF YOU CHANGE THIS NUMBER, YOU WILL HAVE DIFFERENT REMOVALS THAN I HAVE NOW. SARAH AND AMBER, CHANGE THIS SET SEED NUMBER 
-#TO ANY OTHER RANDOM VALUE TO ENSURE YOU REMOVE DIFFERENT TWINS THAN MYSELF#
+#This script is contigent on a random set seed to remove different twins each time. The number I used
+#is 4563.
 
-set.seed(4563)  # Set a seed for reproducibility, change as needed
+set.seed(4563)
 merge1 <- merge1 %>%
   group_by(FEARON_FID) %>%
   slice_sample(n = 1) %>%
@@ -198,4 +179,4 @@ print(instance_prop)
 #MERGE GENETIC DATA WITH PHENOTYPIC#
 ####################################
 
-write_csv(all_mcs, paste(data_path, "merge_with_genetic_data", ".csv", sep = ""))
+write_csv(all_mcs_genetic, paste(mcs_data_path, "merge_with_genetic_data", ".csv", sep = ""))
