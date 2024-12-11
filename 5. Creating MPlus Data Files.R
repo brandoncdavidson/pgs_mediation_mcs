@@ -29,9 +29,9 @@ lang_and_nonverb_5_years_data <- all_mcs_genetic %>%
 full_lang_data <- all_mcs_genetic %>%
   select(BDBAST00, CCNVTSCORE, DCMATHS7SA, DCWRSD00, total_score, weight, PTTYPE2, Child_PRS_regressed, Mother_PRS_regressed, Father_PRS_regressed)
 
-#Export these new dataframes
+#Export these new dataframes into .dat files to be read in MPlus
 
-write_csv(lang_5_years_data, paste(data_path, "lang_5_years_data", ".csv", sep = ""))
-write_csv(nonverb_5_years_data, paste(data_path, "nonverb_5_years_data", ".csv", sep = ""))
-write_csv(lang_and_nonverb_5_years_data, paste(data_path, "lang_and_nonverb_5_years_data", ".csv", sep = ""))
-write_csv(full_lang_data, paste(data_path, "full_lang_data", ".csv", sep = ""))
+write.table(lang_5_years_data, paste(data_path, "lang_5_years_data", ".txt", sep = ""), quote=FALSE, row.names = FALSE, col.names = FALSE)
+write.table(nonverb_5_years_data, paste(data_path, "nonverb_5_years_data", ".txt", sep = ""), quote=FALSE, row.names = FALSE, col.names = FALSE)
+write.table(lang_and_nonverb_5_years_data, paste(data_path, "lang_and_nonverb_5_years_data", ".txt", sep = ""), quote=FALSE, row.names = FALSE, col.names = FALSE)
+write.table(full_lang_data, paste(data_path, "full_lang_data", ".txt", sep = ""), quote=FALSE, row.names = FALSE, col.names = FALSE)
