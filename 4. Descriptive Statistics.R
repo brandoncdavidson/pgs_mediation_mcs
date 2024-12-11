@@ -14,12 +14,11 @@ library(Hmisc)
 library(e1071)
 
 data_path <- "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Full dataset/"
-data_name <- "merge_with_genetic_data"
-all_mcs <- read.csv((paste(data_path, data_name, ".csv", sep = "")), na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A"))
+data_name_full_sample <- "merge_with_genetic_data"
+data_name_genetic_subset <- "merge_with_genetic_data_only_genetic"
 
-all_mcs_genetic <- all_mcs [!(is.na(all_mcs$Child_PRS_regressed) & 
-                                is.na(all_mcs$Father_PRS_regressed) & 
-                                is.na(all_mcs$Mother_PRS_regressed)), ]
+all_mcs <- read.csv((paste(data_path, data_name_full_sample, ".csv", sep = "")), na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A"))
+all_mcs_genetic <- read.csv((paste(data_path, data_name_genetic_subset, ".csv", sep = "")), na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A"))
 
 child_id_with_genetic <- as.list(all_mcs_genetic$child_ID)
 
