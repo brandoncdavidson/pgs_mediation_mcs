@@ -81,12 +81,31 @@ missing_participant <- all_mcs[is.na(all_mcs$AHCSEX00), ]
 
 all_mcs$average_oecd_score <- rowMeans(all_mcs[, c("ADOEDE00", "BDOEDE00", "CDOEDE00", "DDOEDE00", "EOEDE000", "FOEDE000")], na.rm = TRUE)
 
+#################
+#SAMPLING WEIGHT#
+#################
+
+#the nature of MCS sampling weights is that they are developed each sweep - using the weight from the
+#sweep before alongside new information. As such, the most recent weight for any participant is the
+#most informative. Given that weights can only be applied once in MPlus, we will apply the most recent
+#weight from any participant.
+
+all_mcs$weight <- coalesce(
+  all_mcs$GOVWT2,
+  all_mcs$FOVWT2,
+  all_mcs$EOVWT2,
+  all_mcs$DOVWT2,
+  all_mcs$COVWT2,
+  all_mcs$BOVWT2,
+  all_mcs$AOVWT2
+)
+
 #########
 #cleanup#
 #########
 
 all_mcs <- all_mcs %>%
-  select(-BHCSEX00, -ADOEDE00, -BDOEDE00, -CDOEDE00, -DDOEDE00, -EOEDE000, -FOEDE000, -starts_with("Subject"))
+  select(-BHCSEX00, -ADOEDE00, -BDOEDE00, -CDOEDE00, -DDOEDE00, -EOEDE000, -FOEDE000, -starts_with("Subject"), -ends_with("OVWT1"), -ends_with("OVWT2"))
 
 ###############################
 #write.csv with the covariates#
