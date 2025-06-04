@@ -14,4 +14,4 @@ This contains the 1 script to calculate preliminary N values, means, standard de
 
 *3. MPlus Model Scripts*
 
-This contains the .inp files that can be read into MPlus to reproduce the structural models. This includes non-mediation models (used to identify model fit statistics and standardised path values) and mediation models (used to calculate confidence intervals and indirect effects). These .inp files are named corresponding to the relevant Figure/Table of which they produce findings for.
+This contains the .inp files that can be read into MPlus to reproduce the structural models. This includes non-mediation models (used to identify model fit statistics and standardised path values) and mediation models (used to calculate confidence intervals and indirect effects). These .inp files are named corresponding to the relevant Figure/Table of which they produce findings for. As data access for genetic data is limited, we have included the corresponding .out files, which show the exact results we recieved when running these models on our dataset.
