@@ -1,6 +1,6 @@
-# Davidson et al., 2025: "Early Developmental Markers of Genetic Influences on Academic Attainment"
+# Davidson et al., 2025: "Verbal and Non-verbal Cognition are Early Developmental Markers of Genetic Influences on Academic Achievement"
 
-A repository for the research study *"Early Developmental Markers of Genetic Influences on Academic Attainment"* by Davidson, Austerberry & Fearon (2025).
+A repository for the research study *"Verbal and Non-verbal Cognition are Early Developmental Markers of Genetic Influences on Academic Achievement"* by Davidson, Austerberry, van de Grint-Stoop, Bernardi, Fish, Morris & Fearon (2025).
 
 This repository is broken down into three sub-sections:
 
@@ -14,4 +14,4 @@ This contains the 1 script to calculate preliminary N values, means, standard de
 
 *3. MPlus Model Scripts*
 
-This contains the .inp files that can be read into MPlus to reproduce the structural models. This includes non-mediation models (used to identify model fit statistics and standardised path values) and mediation models (used to calculate confidence intervals and indirect effects). These .inp files are named corresponding to the relevant Figure/Table of which they produce findings for. As data access for genetic data is limited, we have included the corresponding .out files, which show the exact results we recieved when running these models on our dataset.
+This contains the .inp files that can be read into MPlus to reproduce the structural models. For each analysis, there is 3 scripts: (1) measurement models (used to identify model fit statistics and standardised path values), mediation models for academic achievement at age 7 (used to calculate confidence intervals and indirect effects) and mediation models for academic achievement at age 17 (used to calculate confidence intervals and indirect effects). We have included the .out files from the MPlus analysis, which provides the input script used to produce the findings, and all of the raw output information used to produce the Figures and Tables in the main text. 
