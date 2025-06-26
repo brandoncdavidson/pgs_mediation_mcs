@@ -1,0 +1,513 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+05/26/2025   1:50 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE: SEM model equivalent to R lavaan model with sampling/non-response weights;
+
+    DATA: FILE = "/Users/jessicavandegrint/Library/CloudStorage/
+    OneDrive-UniversityofCambridge/Brandon/nonverb_5_years_data.txt";
+
+    VARIABLE:
+      NAMES = CCPSTSCORE CCPCTSCORE DCMATHS7SA DCWRSD00 total_score weight PTTYPE2
+      Child_PRS_regressed Mother_PRS_regressed Father_PRS_regressed;
+      WEIGHT = weight;
+      STRATIFICATION = PTTYPE2;
+      MISSING ARE ALL (-9999);
+
+    ANALYSIS:
+      TYPE = COMPLEX;
+      ESTIMATOR = ML;
+
+    MODEL:
+      ! Define latent variables
+      nonverb5 BY CCPSTSCORE CCPCTSCORE;
+      edu7 BY DCMATHS7SA DCWRSD00;
+
+      ! Define structural paths with labels
+      nonverb5 ON Child_PRS_regressed (a);
+      nonverb5 ON Mother_PRS_regressed (f);
+      nonverb5 ON Father_PRS_regressed (i);
+      edu7 ON nonverb5 (d);
+      edu7 ON Child_PRS_regressed (b);
+      edu7 ON Mother_PRS_regressed (g);
+      edu7 ON Father_PRS_regressed (j);
+      total_score ON edu7 (e);
+      total_score ON Child_PRS_regressed (c);
+      total_score ON Mother_PRS_regressed (h);
+      total_score ON Father_PRS_regressed (k);
+
+    ! Control PRS interrelations
+    Child_PRS_regressed ON Mother_PRS_regressed Father_PRS_regressed;
+    Mother_PRS_regressed WITH Father_PRS_regressed;
+
+  OUTPUT:
+    STANDARDIZED (STDYX);
+    SAMPSTAT;
+    MODINDICES(ALL);
+
+
+
+*** WARNING in ANALYSIS command
+  Use ESTIMATOR=MLR instead of ESTIMATOR=ML for TYPE=COMPLEX.
+  Default estimator will be used.
+*** WARNING in VARIABLE command
+  Note that only the first 8 characters of variable names are used in the output.
+  Shorten variable names to avoid any confusion.
+   2 WARNING(S) FOUND IN THE INPUT INSTRUCTIONS
+
+
+
+SEM model equivalent to R lavaan model with sampling/non-response weights;
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                        8014
+
+Number of dependent variables                                    6
+Number of independent variables                                  2
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Continuous
+   CCPSTSCORE  CCPCTSCORE  DCMATHS7SA  DCWRSD00    TOTAL_SCOR  CHILD_PRS_
+
+Observed independent variables
+   MOTHER_P    FATHER_P
+
+Continuous latent variables
+   NONVERB5    EDU7
+
+Variables with special functions
+
+  Stratification        PTTYPE2
+  Weight variable       WEIGHT
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+
+Input data file(s)
+  /Users/jessicavandegrint/Library/CloudStorage/OneDrive-UniversityofCambridge/B
+
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+     Number of missing data patterns            98
+     Number of strata                            9
+
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+
+     PROPORTION OF DATA PRESENT
+
+
+           Covariance Coverage
+              CCPSTSCO      CCPCTSCO      DCMATHS7      DCWRSD00      TOTAL_SC
+              ________      ________      ________      ________      ________
+ CCPSTSCO       0.957
+ CCPCTSCO       0.955         0.956
+ DCMATHS7       0.905         0.904         0.927
+ DCWRSD00       0.893         0.892         0.912         0.915
+ TOTAL_SC       0.649         0.648         0.636         0.626         0.669
+ CHILD_PR       0.781         0.780         0.760         0.749         0.553
+ MOTHER_P       0.799         0.798         0.775         0.764         0.557
+ FATHER_P       0.479         0.479         0.469         0.462         0.355
+
+
+           Covariance Coverage
+              CHILD_PR      MOTHER_P      FATHER_P
+              ________      ________      ________
+ CHILD_PR       0.818
+ MOTHER_P       0.677         0.833
+ FATHER_P       0.402         0.397         0.493
+
+
+SAMPLE STATISTICS
+
+
+     ESTIMATED SAMPLE STATISTICS
+
+
+           Means
+              CCPSTSCO      CCPCTSCO      DCMATHS7      DCWRSD00      TOTAL_SC
+              ________      ________      ________      ________      ________
+               55.368        50.878        98.924       112.365        44.779
+
+
+           Means
+              CHILD_PR      MOTHER_P      FATHER_P
+              ________      ________      ________
+               -0.042        -0.031        -0.012
+
+
+           Covariances
+              CCPSTSCO      CCPCTSCO      DCMATHS7      DCWRSD00      TOTAL_SC
+              ________      ________      ________      ________      ________
+ CCPSTSCO     107.925
+ CCPCTSCO      43.130       108.305
+ DCMATHS7      54.882        68.940       235.597
+ DCWRSD00      46.090        66.048       144.212       316.147
+ TOTAL_SC      66.164        84.866       164.953       216.122       509.702
+ CHILD_PR       0.681         1.080         2.174         2.827         5.128
+ MOTHER_P       0.411         0.754         1.171         1.591         2.646
+ FATHER_P       0.788         0.504         1.033         1.254         2.629
+
+
+           Covariances
+              CHILD_PR      MOTHER_P      FATHER_P
+              ________      ________      ________
+ CHILD_PR       0.888
+ MOTHER_P       0.450         0.865
+ FATHER_P       0.451         0.045         0.827
+
+
+           Correlations
+              CCPSTSCO      CCPCTSCO      DCMATHS7      DCWRSD00      TOTAL_SC
+              ________      ________      ________      ________      ________
+ CCPSTSCO       1.000
+ CCPCTSCO       0.399         1.000
+ DCMATHS7       0.344         0.432         1.000
+ DCWRSD00       0.250         0.357         0.528         1.000
+ TOTAL_SC       0.282         0.361         0.476         0.538         1.000
+ CHILD_PR       0.070         0.110         0.150         0.169         0.241
+ MOTHER_P       0.043         0.078         0.082         0.096         0.126
+ FATHER_P       0.083         0.053         0.074         0.078         0.128
+
+
+           Correlations
+              CHILD_PR      MOTHER_P      FATHER_P
+              ________      ________      ________
+ CHILD_PR       1.000
+ MOTHER_P       0.513         1.000
+ FATHER_P       0.527         0.053         1.000
+
+
+     MAXIMUM LOG-LIKELIHOOD VALUE FOR THE UNRESTRICTED (H1) MODEL IS -152790.043
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     CCPSTSCORE           55.459      -0.048      20.000    0.91%      48.000     53.000     56.000
+            7670.000     107.931       0.781      80.000    3.81%      58.000     64.000
+     CCPCTSCORE           50.997      -0.638      20.000    3.08%      45.000     49.000     51.000
+            7663.000     108.224       1.597      80.000    0.37%      54.000     59.000
+     DCMATHS7SA           99.463       0.097      69.000    1.84%      86.000     96.000    100.000
+            7431.000     231.339      -0.545     136.000    0.04%     103.000    112.000
+     DCWRSD00            112.947      -0.233      55.000    0.03%      96.000    108.000    113.000
+            7332.000     313.118      -0.297     145.000    4.11%     118.000    128.000
+     TOTAL_SCORE          46.741       0.181       0.000    0.07%      26.500     40.500     46.500
+            5358.000     490.755      -0.533     115.500    0.02%      52.500     66.750
+     CHILD_PRS_REGRE      -0.044      -0.019      -4.571    0.02%      -0.813     -0.268     -0.034
+            6554.000       0.886       0.310       3.296    0.02%       0.204      0.742
+     MOTHER_PRS_REGR      -0.026      -0.004      -4.766    0.01%      -0.766     -0.222      0.015
+            6676.000       0.859       0.029       3.282    0.01%       0.241      0.772
+     FATHER_PRS_REGR       0.014      -0.034      -3.418    0.03%      -0.780     -0.187      0.020
+            3947.000       0.832       0.095       3.349    0.03%       0.241      0.781
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       34
+
+Loglikelihood
+
+          H0 Value                     -152862.120
+          H0 Scaling Correction Factor      1.5656
+            for MLR
+          H1 Value                     -152790.043
+          H1 Scaling Correction Factor      1.5008
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                  305792.239
+          Bayesian (BIC)                306029.864
+          Sample-Size Adjusted BIC      305921.818
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                            112.562*
+          Degrees of Freedom                    10
+          P-Value                           0.0000
+          Scaling Correction Factor         1.2807
+            for MLR
+
+*   The chi-square value for MLM, MLMV, MLR, ULSMV, WLSM and WLSMV cannot be used
+    for chi-square difference testing in the regular way.  MLM, MLR and WLSM
+    chi-square difference testing is described on the Mplus website.  MLMV, WLSMV,
+    and ULSMV difference testing is done using the DIFFTEST option.
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.036
+          90 Percent C.I.                    0.030  0.042
+          Probability RMSEA <= .05           1.000
+
+CFI/TLI
+
+          CFI                                0.986
+          TLI                                0.962
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                           7237.219
+          Degrees of Freedom                    27
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.016
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ NONVERB5 BY
+    CCPSTSCORE         1.000      0.000    999.000    999.000
+    CCPCTSCORE         1.312      0.052     25.370      0.000
+
+ EDU7     BY
+    DCMATHS7SA         1.000      0.000    999.000    999.000
+    DCWRSD00           1.128      0.032     35.315      0.000
+
+ EDU7     ON
+    NONVERB5           1.443      0.069     20.909      0.000
+
+ NONVERB5 ON
+    CHILD_PRS_         0.603      0.211      2.856      0.004
+    MOTHER_PRS         0.281      0.168      1.671      0.095
+    FATHER_PRS         0.263      0.208      1.265      0.206
+
+ EDU7     ON
+    CHILD_PRS_         1.773      0.348      5.102      0.000
+    MOTHER_PRS        -0.290      0.265     -1.097      0.273
+    FATHER_PRS        -0.535      0.343     -1.558      0.119
+
+ TOTAL_SC ON
+    EDU7               1.329      0.046     29.128      0.000
+
+ TOTAL_SC ON
+    CHILD_PRS_         2.147      0.653      3.286      0.001
+    MOTHER_PRS        -0.032      0.481     -0.067      0.947
+    FATHER_PRS         0.282      0.602      0.468      0.640
+
+ CHILD_PR ON
+    MOTHER_PRS         0.493      0.016     30.013      0.000
+    FATHER_PRS         0.520      0.015     35.554      0.000
+
+ MOTHER_P WITH
+    FATHER_PRS         0.044      0.018      2.462      0.014
+
+ Means
+    MOTHER_PRS        -0.031      0.015     -2.065      0.039
+    FATHER_PRS        -0.013      0.017     -0.749      0.454
+
+ Intercepts
+    CCPSTSCORE        55.400      0.146    380.305      0.000
+    CCPCTSCORE        50.921      0.150    339.081      0.000
+    DCMATHS7SA        99.047      0.221    447.808      0.000
+    DCWRSD00         112.485      0.257    437.383      0.000
+    TOTAL_SCOR        45.074      0.387    116.579      0.000
+    CHILD_PRS_        -0.019      0.013     -1.523      0.128
+
+ Variances
+    MOTHER_PRS         0.865      0.022     38.973      0.000
+    FATHER_PRS         0.827      0.022     36.792      0.000
+
+ Residual Variances
+    CCPSTSCORE        75.067      1.865     40.245      0.000
+    CCPCTSCORE        51.692      2.708     19.085      0.000
+    DCMATHS7SA       106.295      3.664     29.009      0.000
+    DCWRSD00         153.698      4.825     31.855      0.000
+    TOTAL_SCOR       262.828      9.145     28.741      0.000
+    CHILD_PRS_         0.431      0.013     34.315      0.000
+    NONVERB5          32.147      2.160     14.886      0.000
+    EDU7              55.321      3.591     15.404      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.121E-04
+       (ratio of smallest to largest eigenvalue)
+
+
+STANDARDIZED MODEL RESULTS
+
+
+STDYX Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ NONVERB5 BY
+    CCPSTSCORE         0.552      0.015     37.340      0.000
+    CCPCTSCORE         0.723      0.017     42.022      0.000
+
+ EDU7     BY
+    DCMATHS7SA         0.740      0.011     68.142      0.000
+    DCWRSD00           0.718      0.011     62.569      0.000
+
+ EDU7     ON
+    NONVERB5           0.731      0.019     38.224      0.000
+
+ NONVERB5 ON
+    CHILD_PRS_         0.099      0.035      2.830      0.005
+    MOTHER_PRS         0.046      0.027      1.678      0.093
+    FATHER_PRS         0.042      0.033      1.272      0.203
+
+ EDU7     ON
+    CHILD_PRS_         0.147      0.029      5.105      0.000
+    MOTHER_PRS        -0.024      0.022     -1.097      0.272
+    FATHER_PRS        -0.043      0.028     -1.559      0.119
+
+ TOTAL_SC ON
+    EDU7               0.668      0.014     47.265      0.000
+
+ TOTAL_SC ON
+    CHILD_PRS_         0.090      0.027      3.274      0.001
+    MOTHER_PRS        -0.001      0.020     -0.067      0.947
+    FATHER_PRS         0.011      0.024      0.468      0.640
+
+ CHILD_PR ON
+    MOTHER_PRS         0.487      0.016     31.335      0.000
+    FATHER_PRS         0.501      0.013     37.254      0.000
+
+ MOTHER_P WITH
+    FATHER_PRS         0.052      0.021      2.457      0.014
+
+ Means
+    MOTHER_PRS        -0.034      0.016     -2.076      0.038
+    FATHER_PRS        -0.014      0.019     -0.750      0.454
+
+ Intercepts
+    CCPSTSCORE         5.332      0.066     80.955      0.000
+    CCPCTSCORE         4.892      0.077     63.890      0.000
+    DCMATHS7SA         6.465      0.059    110.133      0.000
+    DCWRSD00           6.318      0.068     93.140      0.000
+    TOTAL_SCOR         1.999      0.028     71.473      0.000
+    CHILD_PRS_        -0.021      0.014     -1.525      0.127
+
+ Variances
+    MOTHER_PRS         1.000      0.000    999.000    999.000
+    FATHER_PRS         1.000      0.000    999.000    999.000
+
+ Residual Variances
+    CCPSTSCORE         0.695      0.016     42.603      0.000
+    CCPCTSCORE         0.477      0.025     19.172      0.000
+    DCMATHS7SA         0.453      0.016     28.197      0.000
+    DCWRSD00           0.485      0.016     29.442      0.000
+    TOTAL_SCOR         0.517      0.018     28.742      0.000
+    CHILD_PRS_         0.486      0.013     36.424      0.000
+    NONVERB5           0.977      0.006    155.418      0.000
+    EDU7               0.431      0.027     16.041      0.000
+
+
+R-SQUARE
+
+    Observed                                        Two-Tailed
+    Variable        Estimate       S.E.  Est./S.E.    P-Value
+
+    CCPSTSCO           0.305      0.016     18.670      0.000
+    CCPCTSCO           0.523      0.025     21.011      0.000
+    DCMATHS7           0.547      0.016     34.071      0.000
+    DCWRSD00           0.515      0.016     31.284      0.000
+    TOTAL_SC           0.483      0.018     26.830      0.000
+    CHILD_PR           0.514      0.013     38.544      0.000
+
+     Latent                                         Two-Tailed
+    Variable        Estimate       S.E.  Est./S.E.    P-Value
+
+    NONVERB5           0.023      0.006      3.624      0.000
+    EDU7               0.569      0.027     21.200      0.000
+
+
+MODEL MODIFICATION INDICES
+
+Minimum M.I. value for printing the modification index    10.000
+
+                                   M.I.     E.P.C.  Std E.P.C.  StdYX E.P.C.
+
+ON/BY Statements
+
+DCMATHS7 ON NONVERB5 /
+NONVERB5 BY DCMATHS7              74.795     0.887      5.085        0.332
+DCWRSD00 ON NONVERB5 /
+NONVERB5 BY DCWRSD00              60.149    -0.899     -5.157       -0.290
+
+ON Statements
+
+NONVERB5 ON DCMATHS7              67.579     0.224      0.039        0.598
+NONVERB5 ON DCWRSD00              55.480    -0.159     -0.028       -0.493
+EDU7     ON DCMATHS7              64.455    -0.302     -0.027       -0.408
+EDU7     ON DCWRSD00              50.600     0.208      0.018        0.327
+CCPSTSCO ON DCMATHS7              23.972     0.084      0.084        0.123
+CCPSTSCO ON DCWRSD00              29.890    -0.074     -0.074       -0.127
+CCPCTSCO ON DCMATHS7              18.841     0.076      0.076        0.113
+DCMATHS7 ON CCPSTSCO              41.343     0.141      0.141        0.096
+DCMATHS7 ON CCPCTSCO              36.862     0.162      0.162        0.110
+DCMATHS7 ON TOTAL_SC              57.363    -0.155     -0.155       -0.229
+DCWRSD00 ON CCPSTSCO              42.245    -0.164     -0.164       -0.095
+DCWRSD00 ON CCPCTSCO              25.659    -0.154     -0.154       -0.090
+DCWRSD00 ON TOTAL_SC              72.245     0.196      0.196        0.249
+TOTAL_SC ON DCMATHS7              50.340    -0.354     -0.354       -0.241
+TOTAL_SC ON DCWRSD00              64.725     0.313      0.313        0.247
+CHILD_PR ON TOTAL_SC             999.000     0.000      0.000        0.000
+
+WITH Statements
+
+DCMATHS7 WITH NONVERB5            67.585    23.811      4.200        0.407
+DCMATHS7 WITH EDU7                64.556   -32.077     -4.313       -0.418
+DCMATHS7 WITH CCPSTSCO            25.557     9.178      9.178        0.103
+DCMATHS7 WITH CCPCTSCO            17.836     7.911      7.911        0.107
+DCWRSD00 WITH NONVERB5            55.475   -24.428     -4.308       -0.348
+DCWRSD00 WITH EDU7                50.521    32.008      4.303        0.347
+DCWRSD00 WITH CCPSTSCO            28.411   -11.146    -11.146       -0.104
+DCWRSD00 WITH CCPCTSCO            10.660    -6.994     -6.994       -0.078
+TOTAL_SC WITH DCMATHS7            50.535   -37.719    -37.719       -0.226
+TOTAL_SC WITH DCWRSD00            64.529    48.049     48.049        0.239
+
+
+     Beginning Time:  13:50:55
+        Ending Time:  13:50:56
+       Elapsed Time:  00:00:01
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen
