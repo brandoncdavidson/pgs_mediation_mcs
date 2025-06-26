@@ -1,6 +1,6 @@
-# Davidson et al., 2025: "Verbal and Non-verbal Cognition are Early Developmental Markers of Genetic Influences on Academic Achievement"
+# "Verbal and Non-verbal Cognition are Early Developmental Markers of Genetic Influences on Academic Achievement"
 
-A repository for the research study *"Verbal and Non-verbal Cognition are Early Developmental Markers of Genetic Influences on Academic Achievement"* by Davidson, Austerberry, van de Grint-Stoop, Bernardi, Fish, Morris & Fearon (2025).
+A repository for the research study *"Verbal and Non-verbal Cognition are Early Developmental Markers of Genetic Influences on Academic Achievement"*.
 
 This repository is broken down into three sub-sections:
 
