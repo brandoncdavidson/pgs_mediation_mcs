@@ -1,6 +1,6 @@
-# "Verbal and Non-verbal Cognition are Early Developmental Markers of Genetic Influences on Academic Achievement"
+# "Language and Non-verbal Cognition are Early Developmental Markers of Genetic Influences on Academic Achievement"
 
-A repository for the research study *"Verbal and Non-verbal Cognition are Early Developmental Markers of Genetic Influences on Academic Achievement"*.
+A repository for the research study *"Verbal and Non-verbal Cognition are Early Developmental Markers of Genetic Influences on Academic Achievement"*. Link to the Preprint here: [LINK TO BE ADDED].
 
 This repository is broken down into three sub-sections:
 
@@ -14,4 +14,4 @@ This contains the 1 script to calculate preliminary N values, means, standard de
 
 *3. MPlus Model Scripts*
 
-This contains the .inp files that can be read into MPlus to reproduce the structural models. For each analysis, there is 3 scripts: (1) measurement models (used to identify model fit statistics and standardised path values), mediation models for academic achievement at age 7 (used to calculate confidence intervals and indirect effects) and mediation models for academic achievement at age 17 (used to calculate confidence intervals and indirect effects). We have included the .out files from the MPlus analysis, which provides the input script used to produce the findings, and all of the raw output information used to produce the Figures and Tables in the main text. 
+This contains the .out files created in MPlus. These files include both the input code, and all of the raw output data used to create the Figures and Tables in the main text and supplementary materials. For each analysis, there is 3 scripts: (1) measurement models (used to identify model fit statistics and standardised path values), mediation models for academic achievement at age 7 (used to calculate confidence intervals and indirect effects) and mediation models for academic achievement at age 17 (used to calculate confidence intervals and indirect effects).
