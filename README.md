@@ -1,6 +1,6 @@
 # "Language and Non-verbal Cognition are Early Developmental Markers of Genetic Influences on Academic Achievement"
 
-A repository for the research study *"Verbal and Non-verbal Cognition are Early Developmental Markers of Genetic Influences on Academic Achievement"*. Link to the Preprint here: [LINK TO BE ADDED].
+A repository for the research study *"Language and Non-verbal Cognition are Early Developmental Markers of Genetic Influences on Academic Achievement"*. Link to the Preprint here: [LINK TO BE ADDED].
 
 This repository is broken down into three sub-sections:
 
