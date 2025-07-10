@@ -11,7 +11,7 @@ library(tidyverse)
 library(tidyr)
 library(psych)
 
-data_path <- "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Full dataset/"
+data_path <- "C:/Users/bd03/OneDrive - University of Cambridge/Genetic Data/Full dataset/"
 
 #######################
 #LOAD IN THE VARIABLES#
