@@ -10,7 +10,7 @@ library(tidyverse)
 library(tidyr)
 library(psych)
 
-mcs_data_path <- "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Full dataset/"
+mcs_data_path <- "C:/Users/bd03/OneDrive - University of Cambridge/Genetic Data/Full dataset/"
 mcs_data_name <- "merge_with_covariates"
 all_mcs <- read.csv((paste(mcs_data_path, mcs_data_name, ".csv", sep = "")), na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A"))
 
@@ -18,7 +18,7 @@ all_mcs <- read.csv((paste(mcs_data_path, mcs_data_name, ".csv", sep = "")), na.
 #LOADING IN GENETIC DATA#
 #########################
 
-genetic_data_path <- "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/"
+genetic_data_path <- "C:/Users/bd03/OneDrive - University of Cambridge/Genetic Data/"
 genetic_data_name <- "prsice_pgi_MCS_EA4_p1e5_fearonid_20231206"
 genetic_data_demographic_name <- "GDAC_2022_17_FEARON_mcs_basic_demographics_v0003_shareable_20220215"
 genetic_data_principle_components_name <- "MCS_topmed_EUR_KING_QCd_PCA_bigsnpr_fearonid_20231206"
@@ -156,6 +156,8 @@ all_mcs_genetic_2 <- all_mcs_genetic[!(is.na(all_mcs_genetic$Child_PRS_regressed
 #########################
 #counts of each instance#
 #########################
+
+#used to reproduce Table S2.
 
 count <- select(all_mcs_genetic_2, Child_PRS_regressed, Mother_PRS_regressed, Father_PRS_regressed) %>%
     rename(Child = Child_PRS_regressed) %>%
