@@ -9,29 +9,38 @@
 rm(list=ls())
 library(dplyr)
 
-data_path <- "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Full dataset/"
+data_path <- "C:/Users/bd03/OneDrive - University of Cambridge/Genetic Data/Full dataset/"
 data_name <- "merge_with_genetic_data_only_genetic"
 all_mcs_genetic <- read.csv((paste(data_path, data_name, ".csv", sep = "")), na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A"))
 
-#Subset 1: Lang_5_years_model
-lang_5_years_data <- all_mcs_genetic %>%
-  select(CCNVTSCORE, DCMATHS7SA, DCWRSD00, total_score, weight, PTTYPE2, Child_PRS_regressed, Mother_PRS_regressed, Father_PRS_regressed)
+#Model 1: Language Model
+model1 <- all_mcs_genetic %>%
+  select(BDBAST00, CCNVTSCORE, DCMATHS7SA, DCWRSD00, total_score, weight, PTTYPE2, Child_PRS_regressed, Mother_PRS_regressed, Father_PRS_regressed) %>%
+  replace(is.na(.), -9999)
 
-#Subset 2: Nonverb_5_years_model
-nonverb_5_years_data <- all_mcs_genetic %>%
-  select(CCPSTSCORE, CCPCTSCORE, DCMATHS7SA, DCWRSD00, total_score, weight, PTTYPE2, Child_PRS_regressed, Mother_PRS_regressed, Father_PRS_regressed)
+#Model 2: Non-verbal Model
+model2 <- all_mcs_genetic %>%
+  select(CCPSTSCORE, CCPCTSCORE, DCMATHS7SA, DCWRSD00, total_score, weight, PTTYPE2, Child_PRS_regressed, Mother_PRS_regressed, Father_PRS_regressed) %>%
+  replace(is.na(.), -9999)
 
-#Subset 3: Lang_and_Nonverb_5_years_model
-lang_and_nonverb_5_years_data <- all_mcs_genetic %>%
-  select(CCNVTSCORE, CCPSTSCORE, CCPCTSCORE, DCMATHS7SA, DCWRSD00, total_score, weight, PTTYPE2, Child_PRS_regressed, Mother_PRS_regressed, Father_PRS_regressed)
+#Supplementary Model 1: Language at 3 years, but not 5 years
+suppmodel1 <- all_mcs_genetic %>%
+  select(BDBAST00, DCMATHS7SA, DCWRSD00, total_score, weight, PTTYPE2, Child_PRS_regressed, Mother_PRS_regressed, Father_PRS_regressed) %>%
+  replace(is.na(.), -9999)
 
-#Subset 4: Full_lang_model
-full_lang_data <- all_mcs_genetic %>%
-  select(BDBAST00, CCNVTSCORE, DCMATHS7SA, DCWRSD00, total_score, weight, PTTYPE2, Child_PRS_regressed, Mother_PRS_regressed, Father_PRS_regressed)
+#Supplementary Model 2: Language at 5 years, but not 3 years
+suppmodel2 <- all_mcs_genetic %>%
+  select(CCNVTSCORE, DCMATHS7SA, DCWRSD00, total_score, weight, PTTYPE2, Child_PRS_regressed, Mother_PRS_regressed, Father_PRS_regressed) %>%
+  replace(is.na(.), -9999)
+
+#Supplementary Model 3: All Significant Pathways
+suppmodel3 <- all_mcs_genetic %>%
+  select(BDBAST00, CCPSTSCORE, CCPCTSCORE, DCMATHS7SA, DCWRSD00, total_score, weight, PTTYPE2, Child_PRS_regressed, Mother_PRS_regressed, Father_PRS_regressed) %>%
+  replace(is.na(.), -9999)
 
 #Export these new dataframes into .dat files to be read in MPlus
-
-write.table(lang_5_years_data, paste(data_path, "lang_5_years_data", ".txt", sep = ""), quote=FALSE, row.names = FALSE, col.names = FALSE)
-write.table(nonverb_5_years_data, paste(data_path, "nonverb_5_years_data", ".txt", sep = ""), quote=FALSE, row.names = FALSE, col.names = FALSE)
-write.table(lang_and_nonverb_5_years_data, paste(data_path, "lang_and_nonverb_5_years_data", ".txt", sep = ""), quote=FALSE, row.names = FALSE, col.names = FALSE)
-write.table(full_lang_data, paste(data_path, "full_lang_data", ".txt", sep = ""), quote=FALSE, row.names = FALSE, col.names = FALSE)
+write.table(model1, paste(data_path, "full_lang_data", ".txt", sep = ""), quote=FALSE, row.names = FALSE, col.names = FALSE)
+write.table(model2, paste(data_path, "nonverb_5_years_data", ".txt", sep = ""), quote=FALSE, row.names = FALSE, col.names = FALSE)
+write.table(suppmodel1, paste(data_path, "lang_3_years_data", ".txt", sep = ""), quote=FALSE, row.names = FALSE, col.names = FALSE)
+write.table(suppmodel2, paste(data_path, "lang_5_years_data", ".txt", sep = ""), quote=FALSE, row.names = FALSE, col.names = FALSE)
+write.table(suppmodel3, paste(data_path, "lang3_nonverb5_data", ".txt", sep = ""), quote=FALSE, row.names = FALSE, col.names = FALSE)
