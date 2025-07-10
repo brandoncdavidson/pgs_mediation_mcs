@@ -7,7 +7,7 @@ library(tidyr)
 
 #reading it in like this means that any refusal, non-completion or null values are being read as NA
 
-data_path <- "C:/Users/brand/OneDrive - University of Cambridge/Genetic Data/Full dataset/"
+data_path <- "C:/Users/bd03/OneDrive - University of Cambridge/Genetic Data/Full dataset/"
 data_name <- "initial_merge"
 all_mcs <- read.csv((paste(data_path, data_name, ".csv", sep = "")), na.strings = c("-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "NA", "N/A"))
 
